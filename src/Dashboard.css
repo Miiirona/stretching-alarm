@@ -1,0 +1,538 @@
+/* ── Root ── */
+.dash-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0e0e15;
+  color: #e8e8f0;
+  font-family: -apple-system, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+}
+
+/* ── Header ── */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 0;
+  flex-shrink: 0;
+}
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.dash-brand-icon {
+  width: 32px; height: 32px;
+  background: #00B894;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.dash-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.4px;
+}
+.dash-gear {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.45);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-gear:hover {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+}
+
+/* ── Scroll area ── */
+.dash-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+.dash-scroll::-webkit-scrollbar { width: 4px; }
+.dash-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+}
+
+/* ── Card ── */
+.dash-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  padding: 18px;
+}
+.dash-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.28);
+  margin-bottom: 12px;
+}
+
+/* ── My stats ── */
+.dash-my-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.dash-my-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.dash-count-num {
+  font-size: 52px;
+  font-weight: 800;
+  color: #00d4a8;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+.dash-count-denom {
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 3px;
+}
+.dash-my-right {
+  flex: 1;
+}
+.dash-dots {
+  display: flex;
+  gap: 5px;
+}
+.dash-dot {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.1);
+  transition: background 0.3s;
+}
+.dash-dot.on { background: #00B894; }
+
+/* ── Today card ── */
+.dash-today-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.dash-today-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.dash-today-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.dash-count-badge {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.dash-count-badge.done {
+  color: #00d4a8;
+  background: rgba(0,184,148,0.12);
+  border-color: rgba(0,184,148,0.3);
+}
+
+/* ── Schedule row ── */
+.dash-schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dash-day-chip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.dash-day-chip.on {
+  background: rgba(0,184,148,0.15);
+  color: #00d4a8;
+  border-color: rgba(0,184,148,0.3);
+}
+.dash-schedule-sep {
+  font-size: 12px;
+  color: rgba(255,255,255,0.15);
+}
+.dash-schedule-info {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ════════════════════════════════════════════
+   그룹 카드
+════════════════════════════════════════════ */
+.dash-group-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 상단: 라벨 + 새로고침 */
+.dash-group-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.dash-refresh {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.4);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-refresh:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+}
+.dash-refresh:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* 그룹 이름 영역 */
+.dash-group-name-area {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dash-group-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-group-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.dash-edit-name-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.28);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 5px;
+  display: flex; align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.dash-edit-name-btn:hover { color: rgba(255,255,255,0.7); }
+.dash-name-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dash-name-input {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(0,184,148,0.4);
+  border-radius: 8px;
+  padding: 7px 11px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  outline: none;
+}
+.dash-name-input::placeholder { color: rgba(255,255,255,0.22); }
+.dash-name-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.dash-name-btn.save { background: #00B894; color: #fff; }
+.dash-name-btn.save:disabled { opacity: 0.5; cursor: not-allowed; }
+.dash-name-btn.cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+.dash-group-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-group-code-small {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+}
+.dash-group-me-badge {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* 기간 토글 */
+.dash-mode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.dash-mode-pill {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.38);
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.dash-mode-pill.on {
+  background: rgba(0,184,148,0.14);
+  border-color: rgba(0,184,148,0.35);
+  color: #00d4a8;
+  font-weight: 700;
+}
+.dash-mode-pill:not(.on):hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.65);
+}
+
+/* 구분선 */
+.dash-group-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin-bottom: 18px;
+}
+
+/* ── 팀 달성률 ── */
+.dash-team-gauge {
+  margin-bottom: 18px;
+}
+.dash-team-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 9px;
+}
+.dash-team-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+}
+.dash-team-pct {
+  font-size: 20px;
+  font-weight: 800;
+  color: #00d4a8;
+  letter-spacing: -0.5px;
+}
+.dash-team-gauge-track {
+  height: 7px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.dash-team-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00B894, #00d4a8);
+  border-radius: 4px;
+  transition: width 0.7s ease;
+}
+.dash-team-detail {
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.28);
+}
+
+/* ── 멤버 리스트 ── */
+.dash-members {
+  display: flex;
+  flex-direction: column;
+}
+.dash-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: default;
+}
+.dash-member:last-child { border-bottom: none; padding-bottom: 0; }
+.dash-member:first-child { padding-top: 0; }
+.dash-member.me { /* 텍스트 색상만 달라짐, 아래 참조 */ }
+
+/* 순위 셀 */
+.dash-rank {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.35);
+}
+.dash-rank.r1,
+.dash-rank.r2,
+.dash-rank.r3 {
+  background: none;
+  font-size: 18px;
+}
+
+/* 멤버 본문 */
+.dash-member-body { flex: 1; min-width: 0; }
+.dash-member-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.dash-member-name-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.dash-member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-me-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #00B894;
+  background: rgba(0,184,148,0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.dash-member-cnt {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.45);
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.dash-member.me .dash-member-cnt  { color: #00d4a8; }
+.dash-member.me .dash-member-name { color: #00d4a8; }
+
+.dash-bar-track {
+  height: 3px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.dash-bar-fill {
+  height: 100%;
+  background: rgba(255,255,255,0.18);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.dash-member.me .dash-bar-fill { background: #00B894; }
+
+/* ── 그룹 없음 ── */
+.dash-no-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+}
+.dash-no-group-icon { opacity: 0.5; }
+.dash-no-group-text {
+  font-size: 14px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.7;
+  margin: 0;
+}
+.dash-no-group-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,184,148,0.4);
+  background: rgba(0,184,148,0.1);
+  color: #00d4a8;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dash-no-group-btn:hover { background: rgba(0,184,148,0.18); }
+
+/* ── 자리비움 배지 ── */
+.dash-away-badge {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 반차 목표 표시 (/4) */
+.dash-member-goal-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  font-weight: 400;
+  margin-left: 1px;
+}
+
+/* 부재 보정 노트 */
+.dash-absent-note {
+  color: rgba(255,255,255,0.2);
+}
+
+/* ── Utils ── */
+.dash-group-loading,
+.dash-empty {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.25);
+  padding: 20px 0;
+}
+.dash-error {
+  font-size: 13px;
+  color: #ff7675;
+  margin: 4px 0 0;
+}

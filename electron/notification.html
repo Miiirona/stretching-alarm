@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 360px;
+      background: transparent;
+      overflow: hidden;
+      font-family: -apple-system, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .toast {
+      width: 340px;
+      margin: 8px auto 0;
+      background: rgba(22, 22, 28, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+      padding: 18px 18px 16px;
+      color: #fff;
+      -webkit-app-region: drag;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+    .icon-wrap {
+      width: 40px; height: 40px;
+      background: rgba(0, 184, 148, 0.15);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .label-title { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
+    .label-sub   { font-size: 11.5px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+    /* ── Guide zone ── */
+    .guide-zone {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 13px;
+      padding: 12px 13px;
+      margin-bottom: 12px;
+      min-height: 76px;
+    }
+
+    .anim-area {
+      width: 52px; height: 52px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .guide-text-wrap { flex: 1; min-width: 0; }
+    .guide-type {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #00B894;
+      margin-bottom: 4px;
+    }
+    .guide-inst-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.2px;
+      margin-bottom: 3px;
+    }
+    .guide-inst-desc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.38);
+      line-height: 1.4;
+    }
+
+    /* ── 목/어깨: breathing circles ── */
+    .breathe-outer {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,184,148,0.3);
+      display: flex; align-items: center; justify-content: center;
+      animation: breatheOuter 4s ease-in-out infinite;
+    }
+    .breathe-inner {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(0,184,148,0.18);
+      border: 2px solid #00B894;
+      animation: breatheInner 4s ease-in-out infinite;
+    }
+    @keyframes breatheOuter {
+      0%, 100% { transform: scale(0.82); opacity: 0.35; }
+      50% { transform: scale(1.12); opacity: 0.85; }
+    }
+    @keyframes breatheInner {
+      0%, 100% { transform: scale(0.88); }
+      50% { transform: scale(1.12); }
+    }
+
+    /* ── 손목: rotating arrow ring ── */
+    .wrist-svg {
+      width: 48px; height: 48px;
+      animation: wristSpin 2.4s linear infinite;
+    }
+    @keyframes wristSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ── 허리: wave equalizer bars ── */
+    .back-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 40px;
+    }
+    .back-bar {
+      width: 7px;
+      border-radius: 4px;
+      background: #00B894;
+    }
+    .back-bar:nth-child(1) { animation: waveBar 1.3s ease-in-out infinite 0s; }
+    .back-bar:nth-child(2) { animation: waveBar 1.3s ease-in-out infinite 0.18s; }
+    .back-bar:nth-child(3) { animation: waveBar 1.3s ease-in-out infinite 0.36s; }
+    .back-bar:nth-child(4) { animation: waveBar 1.3s ease-in-out infinite 0.54s; }
+    .back-bar:nth-child(5) { animation: waveBar 1.3s ease-in-out infinite 0.72s; }
+    @keyframes waveBar {
+      0%, 100% { height: 10px; opacity: 0.4; }
+      50% { height: 36px; opacity: 1; }
+    }
+
+    /* ── 스쿼트: bouncing figure ── */
+    .squat-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      animation: squatMove 1.4s ease-in-out infinite;
+    }
+    .squat-head {
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: #00B894;
+      flex-shrink: 0;
+    }
+    .squat-body {
+      width: 9px;
+      background: rgba(0,184,148,0.7);
+      border-radius: 3px;
+      transform-origin: top center;
+      animation: squatBody 1.4s ease-in-out infinite;
+    }
+    .squat-legs {
+      display: flex;
+      gap: 5px;
+      animation: squatLegs 1.4s ease-in-out infinite;
+    }
+    .squat-leg {
+      width: 6px; height: 14px;
+      background: rgba(0,184,148,0.55);
+      border-radius: 3px;
+      transform-origin: top center;
+    }
+    @keyframes squatMove {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+    @keyframes squatBody {
+      0%, 100% { height: 16px; }
+      50% { height: 10px; }
+    }
+    @keyframes squatLegs {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.6) rotate(0deg); }
+    }
+
+    /* ── 걷기: alternating feet ── */
+    .walk-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .walk-body {
+      width: 10px; height: 18px;
+      background: rgba(0,184,148,0.65);
+      border-radius: 4px;
+      position: relative;
+    }
+    .walk-body::before {
+      content: '';
+      position: absolute;
+      top: -16px; left: 50%; transform: translateX(-50%);
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: #00B894;
+    }
+    .walk-feet {
+      display: flex;
+      gap: 10px;
+    }
+    .walk-foot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #00B894;
+      opacity: 0.8;
+    }
+    .walk-foot:nth-child(1) { animation: walkStep 0.9s ease-in-out infinite 0s; }
+    .walk-foot:nth-child(2) { animation: walkStep 0.9s ease-in-out infinite 0.45s; }
+    @keyframes walkStep {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50% { transform: translateY(-14px); opacity: 1; }
+    }
+
+    /* ── Daily gauge ── */
+    .gauge {
+      margin-bottom: 11px;
+    }
+    .gauge-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+    .gauge-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: rgba(255,255,255,0.28);
+    }
+    .gauge-count {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+    }
+    .gauge-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .gauge-dot {
+      flex: 1;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+    }
+    .gauge-dot.filled { background: #00B894; }
+    .gauge-dot.extra  { background: #fdcb6e; }
+
+    /* ── Buttons ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      -webkit-app-region: no-drag;
+    }
+    .btn + .btn { margin-top: 7px; }
+    .btn {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: -0.2px;
+    }
+    .btn:hover  { opacity: 0.82; }
+    .btn:active { transform: scale(0.98); opacity: 0.7; }
+    .btn-primary   { background: #00B894; color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.55);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .caret {
+      font-size: 9px;
+      display: inline-block;
+      transition: transform 0.2s;
+      opacity: 0.6;
+    }
+    .caret.open { transform: rotate(180deg); }
+
+    /* ── DND panel ── */
+    .dnd-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .dnd-panel.open {
+      max-height: 160px;
+      margin-top: 7px;
+    }
+    .dnd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      padding-top: 7px;
+    }
+    .dnd-opt {
+      padding: 8px 6px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.72);
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: background 0.15s;
+      letter-spacing: -0.2px;
+    }
+    .dnd-opt:hover { background: rgba(255,255,255,0.15); }
+    .dnd-opt.full  { grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast">
+
+    <div class="header">
+      <div class="icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="3.5" r="2.5" fill="#00B894"/>
+          <path d="M11 6v6" stroke="#00B894" stroke-width="2" stroke-linecap="round"/>
+          <path d="M5.5 9.5L11 12l5.5-2.5" stroke="#00B894" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8.5 19l2.5-7 2.5 7" stroke="#00B894" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="label-title">스트레칭 할 시간이에요!</div>
+        <div class="label-sub" id="guideSub">잠깐의 휴식이 건강을 지켜줍니다</div>
+      </div>
+    </div>
+
+    <!-- Guide zone: animation + instruction -->
+    <div class="guide-zone">
+      <div class="anim-area" id="animArea"></div>
+      <div class="guide-text-wrap">
+        <div class="guide-type" id="guideType"></div>
+        <div class="guide-inst-title" id="guideInstTitle"></div>
+        <div class="guide-inst-desc" id="guideInstDesc"></div>
+      </div>
+    </div>
+
+    <!-- Daily gauge -->
+    <div class="gauge">
+      <div class="gauge-header">
+        <span class="gauge-label">오늘 스트레칭</span>
+        <span class="gauge-count" id="gaugeCount"></span>
+      </div>
+      <div class="gauge-dots" id="gaugeDots"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary"   id="btnDone">스트레칭 완료</button>
+      <button class="btn btn-secondary" id="btnSnooze">5분 뒤 다시 알리기</button>
+      <button class="btn btn-ghost"     id="btnDnd">
+        방해 금지 모드 <span class="caret" id="caret">▾</span>
+      </button>
+      <div class="dnd-panel" id="dndPanel">
+        <div class="dnd-grid">
+          <button class="dnd-opt" data-m="60">1시간 동안</button>
+          <button class="dnd-opt" data-m="120">2시간 동안</button>
+          <button class="dnd-opt" data-m="180">3시간 동안</button>
+          <button class="dnd-opt" data-m="240">4시간 동안</button>
+          <button class="dnd-opt full" data-m="-1">오늘은 끄기</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const api = window.electronAPI;
+
+    // Auto-resize window to fit content whenever toast height changes
+    new ResizeObserver(entries => {
+      const h = Math.ceil(entries[0].borderBoxSize[0].blockSize) + 8; // +8 = top margin
+      api.send('alarm:resize', h);
+    }).observe(document.getElementById('toast'));
+
+    // Parse URL params injected by main.js
+    const params   = new URLSearchParams(location.search);
+    const guideIdx = parseInt(params.get('guide') ?? '0');
+    const count    = parseInt(params.get('count') ?? '0');
+    const goal     = parseInt(params.get('goal')  ?? '8');
+
+    // Guide definitions
+    const GUIDES = [
+      {
+        type:      '목 / 어깨',
+        instTitle: '어깨를 으쓱이며 긴장을 풀어요',
+        instDesc:  '4초 들숨 → 4초 날숨, 천천히 3번',
+        anim:      'breathe',
+      },
+      {
+        type:      '손목 / 손가락',
+        instTitle: '손목을 부드럽게 돌려요',
+        instDesc:  '시계 방향·반시계 방향 각 5회',
+        anim:      'wrist',
+      },
+      {
+        type:      '허리 / 골반',
+        instTitle: '허리를 살살 기지개 켜요',
+        instDesc:  '앞뒤·좌우로 천천히 늘려요',
+        anim:      'back',
+      },
+      {
+        type:      '스쿼트',
+        instTitle: '자리에서 스쿼트 10회',
+        instDesc:  '무릎이 발끝을 넘지 않게 천천히',
+        anim:      'squat',
+      },
+      {
+        type:      '가벼운 걷기',
+        instTitle: '잠깐 일어나서 걸어봐요',
+        instDesc:  '2~3분만 걸어도 혈액순환에 좋아요',
+        anim:      'walk',
+      },
+    ];
+
+    const g = GUIDES[guideIdx % 5];
+
+    // Populate guide text
+    document.getElementById('guideType').textContent      = g.type;
+    document.getElementById('guideInstTitle').textContent = g.instTitle;
+    document.getElementById('guideInstDesc').textContent  = g.instDesc;
+
+    // Build animation element
+    const animArea = document.getElementById('animArea');
+    if (g.anim === 'breathe') {
+      animArea.innerHTML =
+        '<div class="breathe-outer"><div class="breathe-inner"></div></div>';
+    } else if (g.anim === 'wrist') {
+      animArea.innerHTML = `
+        <svg class="wrist-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="19" stroke="rgba(0,184,148,0.22)" stroke-width="2.5"/>
+          <path d="M24 5 A19 19 0 1 1 7 35" stroke="#00B894" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M20 5 L24 5 L24 10" stroke="#00B894" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+    } else if (g.anim === 'back') {
+      animArea.innerHTML = `
+        <div class="back-bars">
+          <div class="back-bar"></div>
+          <div class="back-bar"></div>
+          <div class="back-bar"></div>
+          <div class="back-bar"></div>
+          <div class="back-bar"></div>
+        </div>`;
+    } else if (g.anim === 'squat') {
+      animArea.innerHTML = `
+        <div class="squat-wrap">
+          <div class="squat-head"></div>
+          <div class="squat-body"></div>
+          <div class="squat-legs">
+            <div class="squat-leg"></div>
+            <div class="squat-leg"></div>
+          </div>
+        </div>`;
+    } else {
+      animArea.innerHTML = `
+        <div class="walk-wrap">
+          <div class="walk-body"></div>
+          <div class="walk-feet">
+            <div class="walk-foot"></div>
+            <div class="walk-foot"></div>
+          </div>
+        </div>`;
+    }
+
+    // Build gauge dots
+    const dotsEl = document.getElementById('gaugeDots');
+    const total  = Math.max(goal, count); // show extra dots if goal exceeded
+    for (let i = 0; i < total; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'gauge-dot' + (i < count ? (i < goal ? ' filled' : ' extra') : '');
+      dotsEl.appendChild(dot);
+    }
+    document.getElementById('gaugeCount').textContent = `${count} / ${goal}`;
+
+    let dndOpen = false;
+
+    // ── Button actions ──────────────────────────────────────────────────────
+    document.getElementById('btnDone').addEventListener('click', () => {
+      api.send('alarm:action', { action: 'complete' });
+    });
+
+    document.getElementById('btnSnooze').addEventListener('click', () => {
+      api.send('alarm:action', { action: 'snooze' });
+    });
+
+    document.getElementById('btnDnd').addEventListener('click', () => {
+      dndOpen = !dndOpen;
+      document.getElementById('dndPanel').classList.toggle('open', dndOpen);
+      document.getElementById('caret').classList.toggle('open', dndOpen);
+      // ResizeObserver handles the window resize automatically
+    });
+
+    document.querySelectorAll('.dnd-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        api.send('alarm:action', { action: 'dnd', value: parseInt(btn.dataset.m) });
+      });
+    });
+
+    // ── Keyboard shortcuts ──────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        api.send('alarm:action', { action: 'complete' });
+      } else if (e.key === 'Escape') {
+        api.send('alarm:action', { action: 'snooze' });
+      }
+    });
+  </script>
+</body>
+</html>
