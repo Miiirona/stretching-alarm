@@ -9,6 +9,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
 const DEV_URL = process.env.VITE_DEV_SERVER_URL ?? 'http://localhost:5200';
 
+// dev와 prod가 같은 Mac에서 실행될 때 userData 경로 충돌 방지
+// prod: ~/Library/Application Support/StretchWidget/  (electron-builder가 productName으로 설정)
+// dev:  ~/Library/Application Support/stretching-alarm-dev/
+if (isDev) {
+  app.setPath('userData', path.join(app.getPath('appData'), 'stretching-alarm-dev'));
+}
+
 let tray = null;
 let settingsWindow = null;
 
