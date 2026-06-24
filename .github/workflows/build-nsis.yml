@@ -1,0 +1,39 @@
+name: Build NSIS Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Firebase config
+        run: echo "$env:FIREBASE_JS" | Out-File -FilePath src/firebase.js -Encoding utf8
+        env:
+          FIREBASE_JS: ${{ secrets.FIREBASE_JS }}
+
+      - name: Build NSIS installer
+        run: npm run build:nsis
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StretchWidget-installer
+          path: release/*.exe
+          retention-days: 30
