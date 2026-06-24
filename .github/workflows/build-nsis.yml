@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write  # GitHub Releases 생성 권한
+
 jobs:
   build:
     runs-on: windows-latest
@@ -28,10 +31,19 @@ jobs:
         env:
           FIREBASE_JS: ${{ secrets.FIREBASE_JS }}
 
-      - name: Build NSIS installer
+      # 태그 push → GitHub Releases에 배포 (자동 업데이트 서버 역할)
+      - name: Build and publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npm run build:release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 수동 실행 → 아티팩트만 업로드 (테스트용)
+      - name: Build only
+        if: github.event_name == 'workflow_dispatch'
         run: npm run build:nsis
 
-      - name: Upload installer artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: StretchWidget-installer

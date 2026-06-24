@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
@@ -354,25 +355,56 @@ function openSettings() {
 }
 
 // --- Tray ---
+let updateReady = false;
+
+function rebuildTrayMenu() {
+  if (!tray) return;
+  const items = [];
+
+  if (isDev) {
+    items.push({ label: '[DEV] 알림 즉시 띄우기', click: showAlarm });
+    items.push({ type: 'separator' });
+  }
+
+  if (updateReady) {
+    items.push({ label: '재시작하여 업데이트 설치', click: () => autoUpdater.quitAndInstall() });
+    items.push({ type: 'separator' });
+  }
+
+  items.push({ label: '설정', click: openSettings });
+  items.push({ type: 'separator' });
+  items.push({ label: '종료', click: () => app.quit() });
+
+  tray.setContextMenu(Menu.buildFromTemplate(items));
+}
+
 function createTray() {
   const icon = nativeImage.createFromPath(ICON_16);
   tray = new Tray(icon);
   tray.setToolTip('StretchWidget');
+  rebuildTrayMenu();
+}
 
-  const menuItems = [
-    { label: '설정', click: openSettings },
-    { type: 'separator' },
-    { label: '종료', click: () => app.quit() },
-  ];
+// --- Auto updater ---
+function setupAutoUpdater() {
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
 
-  if (isDev) {
-    menuItems.unshift(
-      { label: '[DEV] 알림 즉시 띄우기', click: showAlarm },
-      { type: 'separator' },
-    );
-  }
+  autoUpdater.on('update-available', () => {
+    tray?.setToolTip('StretchWidget — 업데이트 다운로드 중...');
+  });
 
-  tray.setContextMenu(Menu.buildFromTemplate(menuItems));
+  autoUpdater.on('update-downloaded', () => {
+    updateReady = true;
+    tray?.setToolTip('StretchWidget — 업데이트 준비 완료');
+    rebuildTrayMenu();
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('[updater]', err.message);
+  });
+
+  autoUpdater.checkForUpdates();
 }
 
 // --- 자정 자동 리셋 타이머 ---
@@ -403,7 +435,8 @@ app.whenReady().then(() => {
   app.setAppUserModelId('com.stretchwidget.app');
   createTray();
   scheduleNextAlarm();
-  scheduleMidnightReset(); // 자정마다 dailyCount 자동 리셋
+  scheduleMidnightReset();
+  if (!isDev) setupAutoUpdater();
 });
 
 // Tray-only app: do not quit when all windows close

@@ -11,11 +11,17 @@
     "gen:icon": "node scripts/gen-icon.mjs",
     "build:nsis": "vite build && electron-builder --win -c.win.target=nsis --publish never",
     "build:msix": "vite build && electron-builder --win -c.win.target=appx --publish never",
+    "build:release": "vite build && electron-builder --win -c.win.target=nsis --publish always",
     "build": "vite build && electron-builder --win",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "build": {
+    "publish": {
+      "provider": "github",
+      "owner": "Miiirona",
+      "repo": "stretching-alarm"
+    },
     "appId": "com.stretchwidget.app",
     "productName": "StretchWidget",
     "icon": "build/icon.ico",
@@ -24,15 +30,26 @@
       "electron/**/*"
     ],
     "extraResources": [
-      { "from": "public/icon-16.png",  "to": "icons/icon-16.png"  },
-      { "from": "public/icon-256.png", "to": "icons/icon-256.png" }
+      {
+        "from": "public/icon-16.png",
+        "to": "icons/icon-16.png"
+      },
+      {
+        "from": "public/icon-256.png",
+        "to": "icons/icon-256.png"
+      }
     ],
     "directories": {
       "output": "release"
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
@@ -49,12 +66,16 @@
       "identityName": "HyemiSo.STAm",
       "publisher": "CN=B1F5E07B-FBC0-44DD-8371-DFA63BBC50BE",
       "publisherDisplayName": "Hyemi So",
-      "languages": ["ko-KR", "en-US"],
+      "languages": [
+        "ko-KR",
+        "en-US"
+      ],
       "showNameOnTiles": true,
       "setBuildNumber": true
     }
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "firebase": "^12.15.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
