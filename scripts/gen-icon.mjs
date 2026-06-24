@@ -146,7 +146,7 @@ const buildDir  = path.join(__dirname, '../build');
 mkdirSync(buildDir, { recursive: true });
 
 const pngs = {};
-for (const size of [16, 32, 48, 256]) {
+for (const size of [16, 32, 48, 256, 512]) {
   pngs[size] = buildIconPng(size);
   const out = path.join(publicDir, `icon-${size}.png`);
   writeFileSync(out, pngs[size]);

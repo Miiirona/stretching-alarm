@@ -57,7 +57,7 @@
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
-      "icon": "public/icon-256.png"
+      "icon": "public/icon-512.png"
     },
     "nsis": {
       "oneClick": true,
