@@ -1,35 +1,56 @@
 {
   "name": "stretching-alarm",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "vite build && electron-builder",
-    "build:dir": "vite build && electron-builder --dir",
+    "gen:icon": "node scripts/gen-icon.mjs",
+    "build:nsis": "vite build && electron-builder --win --target nsis",
+    "build:msix": "vite build && electron-builder --win --target appx",
+    "build": "vite build && electron-builder --win",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "build": {
     "appId": "com.stretchwidget.app",
     "productName": "StretchWidget",
+    "icon": "build/icon.ico",
     "files": [
       "dist/**/*",
       "electron/**/*"
+    ],
+    "extraResources": [
+      { "from": "public/icon-16.png",  "to": "icons/icon-16.png"  },
+      { "from": "public/icon-256.png", "to": "icons/icon-256.png" }
     ],
     "directories": {
       "output": "release"
     },
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false
+    },
+    "appx": {
+      "applicationId": "StretchWidget",
+      "backgroundColor": "#00B894",
+      "displayName": "StretchWidget",
+      "description": "직장인을 위한 정기 스트레칭 알림 위젯",
+      "identityName": "TODO.StretchWidget",
+      "publisher": "CN=TODO",
+      "publisherDisplayName": "TODO",
+      "languages": ["ko-KR", "en-US"],
+      "showNameOnTiles": true,
+      "setBuildNumber": true
     }
   },
   "dependencies": {

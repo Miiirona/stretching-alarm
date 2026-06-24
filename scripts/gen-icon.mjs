@@ -1,12 +1,14 @@
-// Generates StretchWidget app icons — teal background + white bell silhouette.
+// Generates StretchWidget app icons — teal bell on transparent background.
+// Outputs: public/icon-{16,32,48,256}.png  and  build/icon.ico
 // Run: node scripts/gen-icon.mjs
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import zlib from 'zlib';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// ── PNG builder ────────────────────────────────────────────────────────────────
 function buildIconPng(size) {
   const W = size, H = size;
   const pixels = new Uint8Array(W * H * 4); // RGBA, transparent
@@ -39,45 +41,34 @@ function buildIconPng(size) {
 
   const s = size / 256;
   const cx = W / 2;
-  const [TR, TG, TB] = [0, 184, 148];  // #00B894 teal (bell color)
+  const [TR, TG, TB] = [0, 184, 148]; // #00B894
 
-  // --- Bell silhouette (teal, transparent background) ---
-  // All coordinates are in 256-space, scaled by s.
+  // Bell silhouette — all coords in 256-space, scaled by s
 
-  // 1. Knob / loop at top
-  const knobHW  = 10 * s;
-  const knobTop = Math.ceil(18 * s);
-  const knobBot = Math.floor(32 * s);
+  // 1. Knob
+  const knobHW = 10 * s;
+  const knobTop = Math.ceil(18 * s), knobBot = Math.floor(32 * s);
   for (let y = knobTop; y <= knobBot; y++) fillHLine(cx - knobHW, cx + knobHW, y, TR, TG, TB);
 
   // 2. Dome arch (upper semicircle)
-  //    Center at (cx, archCY), radius archR — only draw y <= archCY (top half)
-  const archCY = 118 * s;
-  const archR  = 86 * s;
-  const archTop = Math.ceil((archCY - archR));
-  for (let y = Math.max(archTop, Math.ceil(knobBot)); y <= Math.floor(archCY); y++) {
-    const dy = archCY - y;
-    const hw = Math.sqrt(Math.max(0, archR * archR - dy * dy));
+  const archCY = 118 * s, archR = 86 * s;
+  for (let y = Math.max(Math.ceil(archCY - archR), knobBot); y <= Math.floor(archCY); y++) {
+    const hw = Math.sqrt(Math.max(0, archR * archR - (archCY - y) ** 2));
     fillHLine(cx - hw, cx + hw, y, TR, TG, TB);
   }
 
-  // 3. Straight body (arch center down to rim top)
+  // 3. Straight body
   const rimTop = Math.ceil(185 * s);
-  for (let y = Math.floor(archCY); y <= rimTop; y++) {
-    fillHLine(cx - archR, cx + archR, y, TR, TG, TB);
-  }
+  for (let y = Math.floor(archCY); y <= rimTop; y++) fillHLine(cx - archR, cx + archR, y, TR, TG, TB);
 
-  // 4. Rim (wider horizontal bar)
-  const rimBot = Math.floor(205 * s);
-  const rimHW  = archR + 16 * s;
+  // 4. Rim
+  const rimBot = Math.floor(205 * s), rimHW = archR + 16 * s;
   for (let y = rimTop; y <= rimBot; y++) fillHLine(cx - rimHW, cx + rimHW, y, TR, TG, TB);
 
-  // 5. Clapper (small filled circle below rim)
-  const clapperY = 223 * s;
-  const clapperR = Math.max(1, 11 * s);
-  fillCircle(cx, clapperY, clapperR, TR, TG, TB);
+  // 5. Clapper
+  fillCircle(cx, 223 * s, Math.max(1, 11 * s), TR, TG, TB);
 
-  // --- PNG encoder (RGBA, color type 6) ---
+  // PNG encoder (RGBA, color type 6)
   const crcTable = new Uint32Array(256);
   for (let n = 0; n < 256; n++) {
     let c = n;
@@ -106,8 +97,8 @@ function buildIconPng(size) {
     raw[y * stride] = 0;
     for (let x = 0; x < W; x++) {
       const si = (y * W + x) * 4, di = y * stride + 1 + x * 4;
-      raw[di] = pixels[si]; raw[di+1] = pixels[si+1];
-      raw[di+2] = pixels[si+2]; raw[di+3] = pixels[si+3];
+      raw[di] = pixels[si]; raw[di + 1] = pixels[si + 1];
+      raw[di + 2] = pixels[si + 2]; raw[di + 3] = pixels[si + 3];
     }
   }
 
@@ -119,11 +110,53 @@ function buildIconPng(size) {
   ]);
 }
 
-const publicDir = path.join(__dirname, '../public');
-for (const size of [16, 32, 256]) {
-  const buf = buildIconPng(size);
-  const out = path.join(publicDir, `icon-${size}.png`);
-  writeFileSync(out, buf);
-  console.log(`✓ ${out} (${buf.length} bytes)`);
+// ── ICO builder (PNG-in-ICO, Windows Vista+) ──────────────────────────────────
+function buildIco(entries) {
+  // entries: [{ size, buf }]  — buf must be a valid PNG Buffer
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);              // type: 1 = ICO
+  header.writeUInt16LE(entries.length, 4);
+
+  const dirOffset = 6 + entries.length * 16;
+  const dirs = [];
+  let offset = dirOffset;
+
+  for (const { size, buf } of entries) {
+    const dir = Buffer.alloc(16);
+    dir[0] = size >= 256 ? 0 : size; // width  (0 = 256)
+    dir[1] = size >= 256 ? 0 : size; // height
+    dir[2] = 0;                       // color count (0 = true color)
+    dir[3] = 0;                       // reserved
+    dir.writeUInt16LE(1, 4);          // planes
+    dir.writeUInt16LE(32, 6);         // bits per pixel
+    dir.writeUInt32LE(buf.length, 8); // image data size
+    dir.writeUInt32LE(offset, 12);    // image data offset
+    dirs.push(dir);
+    offset += buf.length;
+  }
+
+  return Buffer.concat([header, ...dirs, ...entries.map(e => e.buf)]);
 }
-console.log('Done.');
+
+// ── Generate files ─────────────────────────────────────────────────────────────
+const publicDir = path.join(__dirname, '../public');
+const buildDir  = path.join(__dirname, '../build');
+
+mkdirSync(buildDir, { recursive: true });
+
+const pngs = {};
+for (const size of [16, 32, 48, 256]) {
+  pngs[size] = buildIconPng(size);
+  const out = path.join(publicDir, `icon-${size}.png`);
+  writeFileSync(out, pngs[size]);
+  console.log(`✓ public/icon-${size}.png  (${pngs[size].length} B)`);
+}
+
+// ICO bundles 16 / 32 / 48 / 256 — used by electron-builder for NSIS & MSIX
+const ico = buildIco([16, 32, 48, 256].map(s => ({ size: s, buf: pngs[s] })));
+const icoPath = path.join(buildDir, 'icon.ico');
+writeFileSync(icoPath, ico);
+console.log(`✓ build/icon.ico           (${ico.length} B)`);
+
+console.log('\nDone. Run `npm run build:nsis` or `npm run build:msix` to package.');
