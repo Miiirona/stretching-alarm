@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen } from 'electron';
-import autoUpdater from 'electron-updater';
+import electronUpdater from 'electron-updater';
+const { autoUpdater } = electronUpdater;
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
