@@ -1,0 +1,43 @@
+name: Build MSIX (Microsoft Store)
+
+on:
+  # 태그 push 시 자동 빌드 (예: git tag v1.0.0 && git push --tags)
+  push:
+    tags:
+      - 'v*'
+  # 수동 실행 (GitHub → Actions 탭 → Run workflow)
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Firebase 설정 파일은 gitignore 처리되어 있으므로
+      # GitHub → Settings → Secrets → FIREBASE_JS 에 src/firebase.js 전체 내용을 붙여넣기
+      - name: Write Firebase config
+        run: echo "$env:FIREBASE_JS" | Out-File -FilePath src/firebase.js -Encoding utf8
+        env:
+          FIREBASE_JS: ${{ secrets.FIREBASE_JS }}
+
+      - name: Build MSIX
+        run: npm run build:msix
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StretchWidget-msix
+          path: release/*.appx
+          retention-days: 30
