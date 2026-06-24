@@ -95,6 +95,7 @@ const DEFAULT_CONFIG = {
   nickname:            null,
   pendingLogs:         [],
   pendingInteractions: [], // 팝업 응답/무응답 로그 (대시보드 열 때 Firestore로 flush)
+  dailyGoal:           8,
   dailyCount:          0,
   lastDateStr:         '',
   groupName:           null,
@@ -152,7 +153,6 @@ let dailyCount   = 0;
 let lastDateStr  = '';
 let guideIndex   = 0;
 let actionTaken  = false; // 현재 알람에 버튼 클릭 여부 (무응답 감지용)
-const DAILY_GOAL = 8;
 
 function checkDailyReset() {
   const today = new Date().toDateString();
@@ -276,7 +276,7 @@ function showAlarm() {
     query: {
       guide: String(guideIndex),
       count: String(dailyCount),
-      goal:  String(DAILY_GOAL),
+      goal:  String(config.dailyGoal ?? 8),
     },
   });
 

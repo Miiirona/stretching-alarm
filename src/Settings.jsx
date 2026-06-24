@@ -243,6 +243,22 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
             </div>
           </section>
 
+          <section className="card">
+            <div className="section-label">하루 목표 횟수</div>
+            <div className="interval-stepper">
+              <button className="interval-arrow"
+                onClick={() => update('dailyGoal', Math.max(1, (local.dailyGoal ?? 8) - 1))}
+                disabled={(local.dailyGoal ?? 8) <= 1}>‹</button>
+              <div className="interval-display">
+                <span className="interval-val">{local.dailyGoal ?? 8}회</span>
+                <span className="interval-hint">팀 달성률 및 게이지 기준</span>
+              </div>
+              <button className="interval-arrow"
+                onClick={() => update('dailyGoal', Math.min(24, (local.dailyGoal ?? 8) + 1))}
+                disabled={(local.dailyGoal ?? 8) >= 24}>›</button>
+            </div>
+          </section>
+
           <button className={`save-btn state-${saveState}`} onClick={handleSave} disabled={!isValid}>
             {saveState === 'saved' ? '저장됨 ✓' : saveState === 'error' ? '오류 발생' : '저장하기'}
           </button>

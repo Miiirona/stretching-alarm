@@ -6,9 +6,7 @@ import {
 } from 'firebase/firestore';
 import './Dashboard.css';
 
-const DAILY_GOAL = 8;
-const HALF_GOAL  = Math.floor(DAILY_GOAL / 2); // 반차 시 목표 (4회)
-const DAY_NAMES  = ['일', '월', '화', '수', '목', '금', '토'];
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
 
 function fmtInterval(m) {
   if (m < 60) return `${m}분마다`;
@@ -39,8 +37,11 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
   const [nameDraft,    setNameDraft]    = useState('');
   const [nameLoading,  setNameLoading]  = useState(false);
 
-  const count   = cfg?.dailyCount ?? 0;
-  const myPct   = Math.min(100, Math.round((count / DAILY_GOAL) * 100));
+  const DAILY_GOAL = cfg?.dailyGoal ?? 8;
+  const HALF_GOAL  = Math.floor(DAILY_GOAL / 2);
+
+  const count  = cfg?.dailyCount ?? 0;
+  const myPct  = Math.min(100, Math.round((count / DAILY_GOAL) * 100));
 
   const todayIdx      = new Date().getDay();
   const isActiveToday = cfg?.activeDays?.includes(todayIdx) ?? false;
