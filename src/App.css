@@ -380,6 +380,18 @@ html, body {
 }
 
 /* ── Settings 헤더 ─────────────────────────────────────── */
+.st-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.st-header-bell-box {
+  width: 26px; height: 26px;
+  background: #00B894;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 .st-header {
   display: flex;
   align-items: center;

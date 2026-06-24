@@ -39,28 +39,16 @@ function buildIconPng(size) {
 
   const s = size / 256;
   const cx = W / 2;
-  const [TR, TG, TB] = [0, 184, 148];  // #00B894 teal
-  const [WR, WG, WB] = [255, 255, 255];
+  const [TR, TG, TB] = [0, 184, 148];  // #00B894 teal (bell color)
 
-  // --- Teal rounded background ---
-  const bgR = Math.round(size * 0.2);
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const nx = Math.max(bgR, Math.min(x, W - 1 - bgR));
-      const ny = Math.max(bgR, Math.min(y, H - 1 - bgR));
-      const dx = x - nx, dy = y - ny;
-      if (dx * dx + dy * dy <= bgR * bgR) setPixel(x, y, TR, TG, TB);
-    }
-  }
-
-  // --- Bell silhouette (white) ---
+  // --- Bell silhouette (teal, transparent background) ---
   // All coordinates are in 256-space, scaled by s.
 
   // 1. Knob / loop at top
   const knobHW  = 10 * s;
   const knobTop = Math.ceil(18 * s);
   const knobBot = Math.floor(32 * s);
-  for (let y = knobTop; y <= knobBot; y++) fillHLine(cx - knobHW, cx + knobHW, y, WR, WG, WB);
+  for (let y = knobTop; y <= knobBot; y++) fillHLine(cx - knobHW, cx + knobHW, y, TR, TG, TB);
 
   // 2. Dome arch (upper semicircle)
   //    Center at (cx, archCY), radius archR — only draw y <= archCY (top half)
@@ -70,24 +58,24 @@ function buildIconPng(size) {
   for (let y = Math.max(archTop, Math.ceil(knobBot)); y <= Math.floor(archCY); y++) {
     const dy = archCY - y;
     const hw = Math.sqrt(Math.max(0, archR * archR - dy * dy));
-    fillHLine(cx - hw, cx + hw, y, WR, WG, WB);
+    fillHLine(cx - hw, cx + hw, y, TR, TG, TB);
   }
 
   // 3. Straight body (arch center down to rim top)
   const rimTop = Math.ceil(185 * s);
   for (let y = Math.floor(archCY); y <= rimTop; y++) {
-    fillHLine(cx - archR, cx + archR, y, WR, WG, WB);
+    fillHLine(cx - archR, cx + archR, y, TR, TG, TB);
   }
 
   // 4. Rim (wider horizontal bar)
   const rimBot = Math.floor(205 * s);
   const rimHW  = archR + 16 * s;
-  for (let y = rimTop; y <= rimBot; y++) fillHLine(cx - rimHW, cx + rimHW, y, WR, WG, WB);
+  for (let y = rimTop; y <= rimBot; y++) fillHLine(cx - rimHW, cx + rimHW, y, TR, TG, TB);
 
   // 5. Clapper (small filled circle below rim)
   const clapperY = 223 * s;
   const clapperR = Math.max(1, 11 * s);
-  fillCircle(cx, clapperY, clapperR, WR, WG, WB);
+  fillCircle(cx, clapperY, clapperR, TR, TG, TB);
 
   // --- PNG encoder (RGBA, color type 6) ---
   const crcTable = new Uint32Array(256);

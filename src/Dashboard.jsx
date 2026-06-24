@@ -246,11 +246,11 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
       <header className="dash-header">
         <div className="dash-brand">
           <div className="dash-brand-icon">
-            <svg width="15" height="15" viewBox="0 0 22 22" fill="none">
-              <circle cx="11" cy="3.5" r="2.5" fill="#fff"/>
-              <path d="M11 6v6" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M5.5 9.5L11 12l5.5-2.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M8.5 19l2.5-7 2.5 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="15" height="15" viewBox="0 0 24 24">
+              <rect x="10.5" y="0" width="3" height="3.5" rx="1.5" fill="#fff"/>
+              <path d="M12 3.5 C16.5 3.5,21 7.5,21 13 L21 17 L3 17 L3 13 C3 7.5,7.5 3.5,12 3.5 Z" fill="#fff"/>
+              <rect x="2" y="16.5" width="20" height="2.5" rx="1.25" fill="#fff"/>
+              <circle cx="12" cy="21.5" r="1.5" fill="#fff"/>
             </svg>
           </div>
           <span className="dash-brand-name">StretchWidget</span>
