@@ -12,6 +12,7 @@
     "build:nsis": "vite build && electron-builder --win -c.win.target=nsis --publish never",
     "build:msix": "vite build && electron-builder --win -c.win.target=appx --publish never",
     "build:release": "vite build && electron-builder --win -c.win.target=nsis --publish always",
+    "build:dmg": "vite build && electron-builder --mac --publish never",
     "build": "vite build && electron-builder --win",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -53,6 +54,10 @@
       ],
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker"
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "icon": "public/icon-256.png"
     },
     "nsis": {
       "oneClick": true,
