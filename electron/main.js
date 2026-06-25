@@ -126,7 +126,7 @@ let nextAlarmAt  = null; // 다음 알람 예정 시각 (ms), 렌더러에 전�
 let dndUntil     = null;
 let dailyCount   = 0;
 let lastDateStr  = '';
-let guideIndex   = 0;
+const GUIDE_COUNT = 11;
 let actionTaken  = false; // 현재 알람에 버튼 클릭 여부 (무응답 감지용)
 
 function checkDailyReset() {
@@ -253,7 +253,7 @@ function showAlarm() {
 
   alarmWindow.loadFile(path.join(__dirname, 'notification.html'), {
     query: {
-      guide: String(guideIndex),
+      guide: String(Math.floor(Math.random() * GUIDE_COUNT)),
       count: String(dailyCount),
       goal:  String(config.dailyGoal ?? 8),
       dev:   isDev ? '1' : '0',
@@ -315,7 +315,6 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
   if (action === 'complete') {
     checkDailyReset();
     dailyCount++;
-    guideIndex++;
     const completedAt = new Date().toISOString();
     const pendingLogs = [...(config.pendingLogs ?? []), { completedAt }];
     const todayLogs   = [...(config.todayLogs   ?? []), { completedAt }];
