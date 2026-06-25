@@ -292,6 +292,20 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             ))}
           </div>
 
+          {/* 완료 시각 칩 — 게이지 바로 아래 */}
+          {cfg.todayLogs?.length > 0 && (
+            <div className="dash-log-chips">
+              {cfg.todayLogs.map((log, i) => {
+                const t = new Date(log.completedAt);
+                return (
+                  <span key={i} className="dash-log-chip">
+                    {String(t.getHours()).padStart(2,'0')}:{String(t.getMinutes()).padStart(2,'0')}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
           <div className="dash-group-divider" style={{ margin: '14px 0 12px' }} />
 
           {/* 스케줄 */}
@@ -313,25 +327,6 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             </div>
           )}
 
-          {/* 오늘 완료 기록 타임스탬프 */}
-          {cfg.todayLogs?.length > 0 && (
-            <>
-              <div className="dash-group-divider" style={{ margin: '12px 0 10px' }} />
-              <div className="dash-log-list">
-                {[...cfg.todayLogs].reverse().map((log, i) => {
-                  const t = new Date(log.completedAt);
-                  return (
-                    <div key={i} className="dash-log-item">
-                      <span className="dash-log-time">
-                        {String(t.getHours()).padStart(2,'0')}:{String(t.getMinutes()).padStart(2,'0')}
-                      </span>
-                      <span className="dash-log-label">스트레칭 완료</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
         </section>
 
         {/* ── 그룹 현황 ── */}
