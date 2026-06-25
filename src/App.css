@@ -3,7 +3,7 @@ html, body {
   color: #e8e8f0;
   font-family: -apple-system, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   -webkit-font-smoothing: antialiased;
-  font-size: 15px;
+  font-size: 16px;
   overflow-x: hidden;
 }
 
@@ -39,7 +39,7 @@ html, body {
 }
 .st-block:first-child { padding-top: 4px; }
 .st-block-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -88,7 +88,7 @@ html, body {
   flex-shrink: 0;
 }
 .st-active-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #00B894;
   text-transform: uppercase;
@@ -111,7 +111,7 @@ html, body {
   color: rgba(255,255,255,0.22);
   font-style: italic;
   font-weight: 400;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ── Tab bar ─────────────────────────────────────────────── */
@@ -131,7 +131,7 @@ html, body {
   border: none;
   background: none;
   color: rgba(255,255,255,0.38);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
@@ -162,14 +162,14 @@ html, body {
   flex-shrink: 0;
 }
 .app-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.4px;
   margin: 0;
   color: #fff;
 }
 .app-sub {
-  font-size: 11px;
+  font-size: 12px;
   color: rgba(255,255,255,0.32);
   margin: 3px 0 0;
 }
@@ -198,7 +198,7 @@ html, body {
   padding: 18px;
 }
 .section-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -253,7 +253,7 @@ html, body {
   gap: 5px;
 }
 .hour-picker-label {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,0.3);
   text-align: center;
 }
@@ -294,7 +294,7 @@ html, body {
 .hour-arrow:disabled { opacity: 0.2; cursor: not-allowed; }
 .field-error {
   margin: 10px 0 0;
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: #ff7675;
 }
 
@@ -341,7 +341,7 @@ html, body {
   letter-spacing: -0.5px;
 }
 .interval-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,0.28);
 }
 
@@ -357,7 +357,7 @@ html, body {
   border: none;
   background: #00B894;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -376,7 +376,7 @@ html, body {
   align-items: center;
   justify-content: center;
   color: rgba(255,255,255,0.25);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* ── Settings 헤더 ─────────────────────────────────────── */
@@ -402,7 +402,7 @@ html, body {
   flex-shrink: 0;
 }
 .st-header-title {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.4px;
@@ -411,7 +411,7 @@ html, body {
   background: none;
   border: none;
   color: rgba(255,255,255,0.38);
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
   cursor: pointer;
   padding: 0;
@@ -448,7 +448,7 @@ html, body {
   gap: 8px;
 }
 .st-optional {
-  font-size: 11px;
+  font-size: 12px;
   color: rgba(255,255,255,0.25);
   font-weight: 400;
   margin-left: 4px;
@@ -459,7 +459,7 @@ html, body {
   gap: 8px;
 }
 .st-group-name-display {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
   flex: 1;
@@ -489,7 +489,7 @@ html, body {
   padding: 7px 12px;
   border-radius: 8px;
   border: none;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -504,7 +504,7 @@ html, body {
   gap: 8px;
 }
 .st-group-code {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #00d4a8;
   letter-spacing: 3px;
@@ -515,12 +515,12 @@ html, body {
   gap: 8px;
 }
 .st-nick-label {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,0.35);
   flex-shrink: 0;
 }
 .st-nick-value {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: rgba(255,255,255,0.75);
 }
@@ -535,7 +535,7 @@ html, body {
   border: 1px solid rgba(255,99,99,0.35);
   background: rgba(255,99,99,0.08);
   color: #ff7675;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
@@ -592,12 +592,12 @@ html, body {
   gap: 2px;
 }
 .st-group-menu-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
 }
 .st-group-menu-sub {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,0.3);
 }
 .st-group-menu-chevron {
@@ -615,7 +615,7 @@ html, body {
   overflow-y: auto;
 }
 .st-form-title {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.5px;
@@ -631,7 +631,7 @@ html, body {
   padding: 14px 16px;
 }
 .st-code-card-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -652,7 +652,7 @@ html, body {
   border: 1px solid rgba(0,184,148,0.4);
   background: none;
   color: #00d4a8;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
@@ -661,7 +661,7 @@ html, body {
 }
 .st-copy-btn:hover { background: rgba(0,184,148,0.12); }
 .st-hint {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(255,255,255,0.28);
   margin: 0;
   line-height: 1.5;
@@ -672,7 +672,7 @@ html, body {
   gap: 7px;
 }
 .st-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(255,255,255,0.38);
 }
@@ -682,7 +682,7 @@ html, body {
   border-radius: 10px;
   padding: 11px 14px;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
@@ -699,7 +699,7 @@ html, body {
   border: none;
   background: #00B894;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -709,7 +709,7 @@ html, body {
 .st-submit-btn:hover:not(:disabled) { opacity: 0.86; }
 .st-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .st-error {
-  font-size: 13px;
+  font-size: 14px;
   color: #ff7675;
   margin: 0;
 }
