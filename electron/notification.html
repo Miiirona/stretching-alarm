@@ -57,7 +57,7 @@
     /* ── Guide zone ── */
     .guide-zone {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 13px;
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.07);
@@ -66,13 +66,12 @@
       margin-bottom: 12px;
       min-height: 76px;
     }
-
     .anim-area {
       width: 52px; height: 52px;
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
     }
-
     .guide-text-wrap { flex: 1; min-width: 0; }
     .guide-type {
       font-size: 10px;
@@ -93,6 +92,42 @@
       font-size: 11px;
       color: rgba(255,255,255,0.38);
       line-height: 1.4;
+    }
+
+    /* ── Paired guide items ── */
+    .guide-pair-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .guide-pair-item:first-of-type { margin-top: 3px; }
+    .guide-pair-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: #00B894;
+      flex-shrink: 0;
+      margin-top: 1px;
+      line-height: 1.4;
+    }
+    .guide-pair-body { flex: 1; }
+    .guide-pair-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.2px;
+      line-height: 1.3;
+    }
+    .guide-pair-desc {
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.4;
+      margin-top: 1px;
+    }
+    .guide-pair-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      margin: 5px 0;
     }
 
     /* ── 목/어깨: breathing circles ── */
@@ -129,7 +164,7 @@
       to   { transform: rotate(360deg); }
     }
 
-    /* ── 허리: wave equalizer bars ── */
+    /* ── 허리/등: wave equalizer bars ── */
     .back-bars {
       display: flex;
       align-items: flex-end;
@@ -193,7 +228,7 @@
     }
     @keyframes squatLegs {
       0%, 100% { transform: scaleY(1); }
-      50% { transform: scaleY(0.6) rotate(0deg); }
+      50% { transform: scaleY(0.6); }
     }
 
     /* ── 걷기: alternating feet ── */
@@ -217,10 +252,7 @@
       border-radius: 50%;
       background: #00B894;
     }
-    .walk-feet {
-      display: flex;
-      gap: 10px;
-    }
+    .walk-feet { display: flex; gap: 10px; }
     .walk-foot {
       width: 8px; height: 8px;
       border-radius: 50%;
@@ -234,10 +266,96 @@
       50% { transform: translateY(-14px); opacity: 1; }
     }
 
-    /* ── Daily gauge ── */
-    .gauge {
-      margin-bottom: 11px;
+    /* ── 눈: blinking + moving eye ── */
+    .eye-socket {
+      width: 40px; height: 22px;
+      border: 2.5px solid #00B894;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      animation: eyeBlink 4s ease-in-out infinite;
     }
+    .eye-pupil {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #00B894;
+      animation: eyeMove 4s ease-in-out infinite;
+    }
+    @keyframes eyeBlink {
+      0%, 75%, 100% { transform: scaleY(1); }
+      82%            { transform: scaleY(0.05); }
+      87%            { transform: scaleY(1); }
+    }
+    @keyframes eyeMove {
+      0%, 100%  { transform: translateX(0); }
+      25%       { transform: translateX(8px); }
+      60%       { transform: translateX(-8px); }
+    }
+
+    /* ── 목: head tilt ── */
+    .neck-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .neck-head {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2.5px solid #00B894;
+      background: rgba(0,184,148,0.18);
+      animation: neckTilt 2.6s ease-in-out infinite;
+    }
+    .neck-stub {
+      width: 5px; height: 12px;
+      background: rgba(0,184,148,0.45);
+      border-radius: 3px;
+      animation: neckTilt 2.6s ease-in-out infinite;
+      transform-origin: top center;
+    }
+    @keyframes neckTilt {
+      0%, 100% { transform: rotate(0deg); }
+      25%      { transform: rotate(-20deg); }
+      75%      { transform: rotate(20deg); }
+    }
+
+    /* ── 종아리: heel raise ── */
+    .calf-figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      animation: calfRaise 1.5s ease-in-out infinite;
+    }
+    .calf-body {
+      width: 10px; height: 18px;
+      background: rgba(0,184,148,0.55);
+      border-radius: 3px;
+      position: relative;
+    }
+    .calf-body::before {
+      content: '';
+      position: absolute;
+      top: -15px; left: 50%; transform: translateX(-50%);
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: #00B894;
+    }
+    .calf-heels {
+      display: flex; gap: 8px;
+    }
+    .calf-heel {
+      width: 10px; height: 5px;
+      border-radius: 3px;
+      background: rgba(0,184,148,0.7);
+    }
+    @keyframes calfRaise {
+      0%, 100%  { transform: translateY(0); }
+      40%, 60%  { transform: translateY(-12px); }
+    }
+
+    /* ── Daily gauge ── */
+    .gauge { margin-bottom: 11px; }
     .gauge-header {
       display: flex;
       justify-content: space-between;
@@ -256,10 +374,7 @@
       font-weight: 600;
       color: rgba(255,255,255,0.45);
     }
-    .gauge-dots {
-      display: flex;
-      gap: 5px;
-    }
+    .gauge-dots { display: flex; gap: 5px; }
     .gauge-dot {
       flex: 1;
       height: 5px;
@@ -358,7 +473,7 @@
     <!-- Guide zone: animation + instruction -->
     <div class="guide-zone">
       <div class="anim-area" id="animArea"></div>
-      <div class="guide-text-wrap">
+      <div class="guide-text-wrap" id="guideTextWrap">
         <div class="guide-type" id="guideType"></div>
         <div class="guide-inst-title" id="guideInstTitle"></div>
         <div class="guide-inst-desc" id="guideInstDesc"></div>
@@ -409,92 +524,186 @@
     const count    = parseInt(params.get('count') ?? '0');
     const goal     = parseInt(params.get('goal')  ?? '8');
 
-    // Guide definitions
+    // ── Guide definitions ──────────────────────────────────────────
+    // paired: true → 간단한 스트레칭 두 가지를 함께 제안
     const GUIDES = [
+      // ── 간단한 스트레칭 (paired) ───────────────────────────────
       {
-        type:      '목 / 어깨',
-        instTitle: '어깨를 으쓱이며 긴장을 풀어요',
-        instDesc:  '4초 들숨 → 4초 날숨, 천천히 3번',
-        anim:      'breathe',
+        type: '손목 / 손가락',
+        paired: true,
+        items: [
+          { title: '손목 돌리기',    desc: '시계·반시계 방향 각 10회' },
+          { title: '손가락 쫙 펴기', desc: '5초 유지 후 주먹 쥐기, 5회' },
+        ],
+        anim: 'wrist',
       },
       {
-        type:      '손목 / 손가락',
-        instTitle: '손목을 부드럽게 돌려요',
-        instDesc:  '시계 방향·반시계 방향 각 5회',
-        anim:      'wrist',
+        type: '눈 스트레칭',
+        paired: true,
+        items: [
+          { title: '20-20-20 법칙',    desc: '6m 거리 사물을 20초간 바라보기' },
+          { title: '눈동자 천천히 굴리기', desc: '눈 감고 좌→우→위→아래, 3회' },
+        ],
+        anim: 'eye',
       },
       {
-        type:      '허리 / 골반',
-        instTitle: '허리를 살살 기지개 켜요',
-        instDesc:  '앞뒤·좌우로 천천히 늘려요',
-        anim:      'back',
+        type: '목 스트레칭',
+        paired: true,
+        items: [
+          { title: '목 좌우로 돌리기', desc: '각 방향 5초 유지, 3회 반복' },
+          { title: '턱 당기기',       desc: '턱을 목 쪽으로 당겨 5초 유지, 5회' },
+        ],
+        anim: 'neck',
       },
       {
-        type:      '스쿼트',
+        type: '어깨 스트레칭',
+        paired: true,
+        items: [
+          { title: '어깨 으쓱이기',    desc: '귀까지 올렸다가 한번에 탁 내리기, 5회' },
+          { title: '어깨 크게 돌리기', desc: '앞→위→뒤 방향으로 천천히 5회씩' },
+        ],
+        anim: 'breathe',
+      },
+      // ── 본격 스트레칭 (single) ─────────────────────────────────
+      {
+        type: '가슴 / 등',
+        instTitle: '손 깍지 끼고 등을 둥글게 말아요',
+        instDesc:  '양손을 앞으로 뻗고 등을 늘려 15초 유지, 2회',
+        anim: 'back',
+      },
+      {
+        type: '허리 / 골반',
+        instTitle: '허리를 좌우로 기지개 켜요',
+        instDesc:  '한 손을 위로 올려 옆으로 15초, 양쪽 각 2회',
+        anim: 'back',
+      },
+      {
+        type: '스쿼트',
         instTitle: '자리에서 스쿼트 10회',
-        instDesc:  '무릎이 발끝을 넘지 않게 천천히',
-        anim:      'squat',
+        instDesc:  '무릎이 발끝을 넘지 않게 천천히 내려갔다 올라오기',
+        anim: 'squat',
       },
       {
-        type:      '가벼운 걷기',
+        type: '가벼운 걷기',
         instTitle: '잠깐 일어나서 걸어봐요',
         instDesc:  '2~3분만 걸어도 혈액순환에 좋아요',
-        anim:      'walk',
+        anim: 'walk',
+      },
+      {
+        type: '종아리 / 발목',
+        instTitle: '앉은 채로 뒤꿈치 들었다 놓기',
+        instDesc:  '양 뒤꿈치를 들어 3초 유지, 15회 반복',
+        anim: 'calf',
+      },
+      {
+        type: '심호흡',
+        instTitle: '깊이 호흡하며 팔을 올려요',
+        instDesc:  '4초 들이쉬며 팔 위로 → 6초 내쉬며 천천히 내리기, 5회',
+        anim: 'breathe',
+      },
+      {
+        type: '고관절 / 허벅지',
+        instTitle: '앉아서 다리를 교차해 늘려요',
+        instDesc:  '발목을 반대쪽 무릎 위에 올려 15초 유지, 양쪽',
+        anim: 'squat',
       },
     ];
 
-    const g = GUIDES[guideIdx % 5];
+    const g = GUIDES[guideIdx % GUIDES.length];
 
-    // Populate guide text
-    document.getElementById('guideType').textContent      = g.type;
-    document.getElementById('guideInstTitle').textContent = g.instTitle;
-    document.getElementById('guideInstDesc').textContent  = g.instDesc;
-
-    // Build animation element
-    const animArea = document.getElementById('animArea');
-    if (g.anim === 'breathe') {
-      animArea.innerHTML =
-        '<div class="breathe-outer"><div class="breathe-inner"></div></div>';
-    } else if (g.anim === 'wrist') {
-      animArea.innerHTML = `
-        <svg class="wrist-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="24" cy="24" r="19" stroke="rgba(0,184,148,0.22)" stroke-width="2.5"/>
-          <path d="M24 5 A19 19 0 1 1 7 35" stroke="#00B894" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M20 5 L24 5 L24 10" stroke="#00B894" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`;
-    } else if (g.anim === 'back') {
-      animArea.innerHTML = `
-        <div class="back-bars">
-          <div class="back-bar"></div>
-          <div class="back-bar"></div>
-          <div class="back-bar"></div>
-          <div class="back-bar"></div>
-          <div class="back-bar"></div>
-        </div>`;
-    } else if (g.anim === 'squat') {
-      animArea.innerHTML = `
-        <div class="squat-wrap">
-          <div class="squat-head"></div>
-          <div class="squat-body"></div>
-          <div class="squat-legs">
-            <div class="squat-leg"></div>
-            <div class="squat-leg"></div>
+    // ── Populate guide text ────────────────────────────────────────
+    if (g.paired) {
+      document.getElementById('guideTextWrap').innerHTML = `
+        <div class="guide-type">${g.type}</div>
+        <div class="guide-pair-item">
+          <span class="guide-pair-num">①</span>
+          <div class="guide-pair-body">
+            <div class="guide-pair-title">${g.items[0].title}</div>
+            <div class="guide-pair-desc">${g.items[0].desc}</div>
           </div>
-        </div>`;
+        </div>
+        <div class="guide-pair-divider"></div>
+        <div class="guide-pair-item">
+          <span class="guide-pair-num">②</span>
+          <div class="guide-pair-body">
+            <div class="guide-pair-title">${g.items[1].title}</div>
+            <div class="guide-pair-desc">${g.items[1].desc}</div>
+          </div>
+        </div>
+      `;
     } else {
-      animArea.innerHTML = `
-        <div class="walk-wrap">
-          <div class="walk-body"></div>
-          <div class="walk-feet">
-            <div class="walk-foot"></div>
-            <div class="walk-foot"></div>
-          </div>
-        </div>`;
+      document.getElementById('guideType').textContent      = g.type;
+      document.getElementById('guideInstTitle').textContent = g.instTitle;
+      document.getElementById('guideInstDesc').textContent  = g.instDesc;
     }
 
-    // Build gauge dots
+    // ── Build animation element ────────────────────────────────────
+    const animArea = document.getElementById('animArea');
+    switch (g.anim) {
+      case 'breathe':
+        animArea.innerHTML =
+          '<div class="breathe-outer"><div class="breathe-inner"></div></div>';
+        break;
+      case 'wrist':
+        animArea.innerHTML = `
+          <svg class="wrist-svg" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="19" stroke="rgba(0,184,148,0.22)" stroke-width="2.5"/>
+            <path d="M24 5 A19 19 0 1 1 7 35" stroke="#00B894" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M20 5 L24 5 L24 10" stroke="#00B894" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>`;
+        break;
+      case 'back':
+        animArea.innerHTML = `
+          <div class="back-bars">
+            <div class="back-bar"></div><div class="back-bar"></div>
+            <div class="back-bar"></div><div class="back-bar"></div>
+            <div class="back-bar"></div>
+          </div>`;
+        break;
+      case 'squat':
+        animArea.innerHTML = `
+          <div class="squat-wrap">
+            <div class="squat-head"></div>
+            <div class="squat-body"></div>
+            <div class="squat-legs">
+              <div class="squat-leg"></div><div class="squat-leg"></div>
+            </div>
+          </div>`;
+        break;
+      case 'walk':
+        animArea.innerHTML = `
+          <div class="walk-wrap">
+            <div class="walk-body"></div>
+            <div class="walk-feet">
+              <div class="walk-foot"></div><div class="walk-foot"></div>
+            </div>
+          </div>`;
+        break;
+      case 'eye':
+        animArea.innerHTML =
+          '<div class="eye-socket"><div class="eye-pupil"></div></div>';
+        break;
+      case 'neck':
+        animArea.innerHTML = `
+          <div class="neck-wrap">
+            <div class="neck-head"></div>
+            <div class="neck-stub"></div>
+          </div>`;
+        break;
+      case 'calf':
+        animArea.innerHTML = `
+          <div class="calf-figure">
+            <div class="calf-body"></div>
+            <div class="calf-heels">
+              <div class="calf-heel"></div><div class="calf-heel"></div>
+            </div>
+          </div>`;
+        break;
+    }
+
+    // ── Build gauge dots ───────────────────────────────────────────
     const dotsEl = document.getElementById('gaugeDots');
-    const total  = Math.max(goal, count); // show extra dots if goal exceeded
+    const total  = Math.max(goal, count);
     for (let i = 0; i < total; i++) {
       const dot = document.createElement('div');
       dot.className = 'gauge-dot' + (i < count ? (i < goal ? ' filled' : ' extra') : '');
@@ -504,29 +713,25 @@
 
     let dndOpen = false;
 
-    // ── Button actions ──────────────────────────────────────────────────────
+    // ── Button actions ─────────────────────────────────────────────
     document.getElementById('btnDone').addEventListener('click', () => {
       api.send('alarm:action', { action: 'complete' });
     });
-
     document.getElementById('btnSnooze').addEventListener('click', () => {
       api.send('alarm:action', { action: 'snooze' });
     });
-
     document.getElementById('btnDnd').addEventListener('click', () => {
       dndOpen = !dndOpen;
       document.getElementById('dndPanel').classList.toggle('open', dndOpen);
       document.getElementById('caret').classList.toggle('open', dndOpen);
-      // ResizeObserver handles the window resize automatically
     });
-
     document.querySelectorAll('.dnd-opt').forEach(btn => {
       btn.addEventListener('click', () => {
         api.send('alarm:action', { action: 'dnd', value: parseInt(btn.dataset.m) });
       });
     });
 
-    // ── Keyboard shortcuts ──────────────────────────────────────────────────
+    // ── Keyboard shortcuts ─────────────────────────────────────────
     document.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
