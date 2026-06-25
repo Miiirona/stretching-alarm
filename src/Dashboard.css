@@ -359,6 +359,18 @@
   margin-bottom: 18px;
 }
 
+/* 그룹별 서브카드 */
+.dash-group-section {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 10px;
+}
+
 /* ── 팀 달성률 ── */
 .dash-team-gauge {
   margin-bottom: 18px;

@@ -409,10 +409,9 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
               <div className="dash-group-loading">불러오는 중...</div>
             )}
 
-            {/* 그룹별 카드 */}
-            {groupsData.map((gData, gIdx) => (
-              <div key={gData.groupCode}>
-                {gIdx > 0 && <div className="dash-group-divider" style={{ margin: '16px 0' }} />}
+            {/* 그룹별 서브카드 */}
+            {groupsData.map((gData) => (
+              <div key={gData.groupCode} className="dash-group-section">
 
                 {/* 그룹 이름 */}
                 <div className="dash-group-name-area">
