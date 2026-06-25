@@ -382,36 +382,35 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
 
         {/* ── 그룹 현황 ── */}
         {hasGroups ? (
-          <section className="dash-card dash-group-card">
-
-            {/* 상단: 라벨 + 새로고침 */}
-            <div className="dash-group-top">
-              <span className="dash-card-label" style={{ marginBottom: 0 }}>그룹 현황</span>
-              <button className="dash-refresh" onClick={() => fetchAllGroups()} disabled={groupLoading}
-                aria-label="새로고침">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M3.51 15a9 9 0 1 0 .49-4.33" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+          <>
+            {/* 헤더 행: 라벨 + 새로고침 + 기간 토글 */}
+            <div className="dash-group-header">
+              <div className="dash-group-header-left">
+                <span className="dash-card-label" style={{ marginBottom: 0 }}>그룹 현황</span>
+                <button className="dash-refresh" onClick={() => fetchAllGroups()} disabled={groupLoading}
+                  aria-label="새로고침">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3.51 15a9 9 0 1 0 .49-4.33" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="dash-mode-row" style={{ marginBottom: 0 }}>
+                <button className={`dash-mode-pill${mode === 'today' ? ' on' : ''}`}
+                  onClick={() => handleModeChange('today')}>오늘</button>
+                <button className={`dash-mode-pill${mode === 'week' ? ' on' : ''}`}
+                  onClick={() => handleModeChange('week')}>이번 주</button>
+              </div>
             </div>
 
-            {/* 기간 토글 (공통) */}
-            <div className="dash-mode-row">
-              <button className={`dash-mode-pill${mode === 'today' ? ' on' : ''}`}
-                onClick={() => handleModeChange('today')}>오늘</button>
-              <button className={`dash-mode-pill${mode === 'week' ? ' on' : ''}`}
-                onClick={() => handleModeChange('week')}>이번 주</button>
-            </div>
-
-            {groupError && <p className="dash-error">{groupError}</p>}
+            {groupError && <p className="dash-error" style={{ padding: '0 2px' }}>{groupError}</p>}
             {groupLoading && groupsData.length === 0 && (
               <div className="dash-group-loading">불러오는 중...</div>
             )}
 
-            {/* 그룹별 서브카드 */}
+            {/* 그룹별 독립 카드 */}
             {groupsData.map((gData) => (
-              <div key={gData.groupCode} className="dash-group-section">
+              <section key={gData.groupCode} className="dash-card dash-group-card">
 
                 {/* 그룹 이름 */}
                 <div className="dash-group-name-area">
@@ -503,9 +502,9 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
                 ) : (
                   <p className="dash-empty">아직 완료 기록이 없어요</p>
                 )}
-              </div>
+              </section>
             ))}
-          </section>
+          </>
         ) : (
           <section className="dash-card dash-no-group">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="dash-no-group-icon">
