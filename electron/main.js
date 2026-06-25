@@ -59,15 +59,14 @@ const DEFAULT_CONFIG = {
   alarmX:              null,
   alarmY:              null,
   userId:              null,
-  groupCode:           null,
   nickname:            null,
+  groups:              [], // [{ groupCode, groupName }]
   pendingLogs:         [],
   todayLogs:           [], // 오늘 로컬 완료 기록 (타임스탬프 표시용, 자정 리셋)
   pendingInteractions: [], // 팝업 응답/무응답 로그 (대시보드 열 때 Firestore로 flush)
   dailyGoal:           8,
   dailyCount:          0,
   lastDateStr:         '',
-  groupName:           null,
 };
 
 let config = { ...DEFAULT_CONFIG };
@@ -75,7 +74,13 @@ let config = { ...DEFAULT_CONFIG };
 function loadConfig() {
   try {
     const raw = readFileSync(path.join(app.getPath('userData'), 'config.json'), 'utf-8');
-    return { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
+    const saved = JSON.parse(raw);
+    const merged = { ...DEFAULT_CONFIG, ...saved };
+    // 구버전 단일 그룹 포맷 마이그레이션
+    if (saved.groupCode && !saved.groups?.length) {
+      merged.groups = [{ groupCode: saved.groupCode, groupName: saved.groupName || '' }];
+    }
+    return merged;
   } catch {
     return { ...DEFAULT_CONFIG };
   }

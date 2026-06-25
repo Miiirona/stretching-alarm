@@ -34,7 +34,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   const [saveState, setSaveState] = useState('idle');
 
   const [groupView,      setGroupView]      = useState('main');
-  const [nickname,       setNickname]       = useState('');
+  const [nickname,       setNickname]       = useState(cfg?.nickname || '');
   const [groupNameInput, setGroupNameInput] = useState('');
   const [codeInput,      setCodeInput]      = useState('');
   const [createdCode,    setCreatedCode]    = useState('');
@@ -43,6 +43,9 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   const [groupErr,       setGroupErr]       = useState('');
   const [editingNick,    setEditingNick]    = useState(false);
   const [nickDraft,      setNickDraft]      = useState('');
+  const [leavingCode,    setLeavingCode]    = useState(null); // 나가기 중인 그룹코드
+
+  const currentGroups = local.groups ?? [];
 
   const update = (key, val) => { setLocal(p => ({ ...p, [key]: val })); setSaveState('idle'); };
   const toggleDay = (idx) => {
@@ -67,8 +70,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     }
   };
 
-  // 새 그룹용 pendingLogs 계산:
-  // 미전송 로그가 있으면 그대로 사용(새 그룹 코드로 flush), 없으면 todayLogs에서 재등록
+  // 새 그룹 추가 시 pendingLogs 계산
+  // 미전송 로그가 있으면 재사용, 없으면 todayLogs 에서 재등록 (새 그룹에 오늘 기록 반영)
   function pendingLogsForNewGroup() {
     const existing = cfg.pendingLogs ?? [];
     if (existing.length > 0) return existing;
@@ -77,17 +80,25 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     return (cfg.todayLogs ?? []).slice(-count);
   }
 
-  async function saveGroup(groupCode, nick, gName = '') {
+  async function addGroup(groupCode, nick, gName = '') {
     setGroupLoad(true); setGroupErr('');
     try {
       if (gName) await setDoc(doc(db, 'groups', groupCode), { groupName: gName });
-      await setDoc(doc(db, 'users', local.userId), { groupCode, nickname: nick });
-      const updated = await window.electronAPI.invoke('config:set', {
-        groupCode, nickname: nick, groupName: gName || null,
+      // 문서 ID: userId_groupCode (멀티그룹 지원)
+      await setDoc(doc(db, 'users', `${local.userId}_${groupCode}`), {
+        userId:    local.userId,
+        groupCode,
+        nickname:  nick,
+      });
+      const newGroup    = { groupCode, groupName: gName || '' };
+      const updGroups   = [...currentGroups, newGroup];
+      const updated     = await window.electronAPI.invoke('config:set', {
+        nickname: nick,
+        groups:   updGroups,
         pendingLogs: pendingLogsForNewGroup(),
       });
       onCfgChange(updated);
-      setLocal(p => ({ ...p, groupCode, nickname: nick, groupName: gName || null }));
+      setLocal(p => ({ ...p, nickname: nick, groups: updGroups }));
       setGroupView('main');
     } catch { setGroupErr('저장에 실패했어요. Firebase 설정을 확인해주세요.'); }
     finally { setGroupLoad(false); }
@@ -96,15 +107,26 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   async function joinGroup(code, nick) {
     setGroupLoad(true); setGroupErr('');
     try {
+      if (currentGroups.some(g => g.groupCode === code)) {
+        setGroupErr('이미 참여 중인 그룹이에요.'); setGroupLoad(false); return;
+      }
       const groupDoc = await getDoc(doc(db, 'groups', code));
-      const gName = groupDoc.exists() ? (groupDoc.data().groupName || null) : null;
-      await setDoc(doc(db, 'users', local.userId), { groupCode: code, nickname: nick });
-      const updated = await window.electronAPI.invoke('config:set', {
-        groupCode: code, nickname: nick, groupName: gName,
+      if (!groupDoc.exists()) { setGroupErr('존재하지 않는 그룹 코드예요.'); setGroupLoad(false); return; }
+      const gName = groupDoc.data().groupName || '';
+      await setDoc(doc(db, 'users', `${local.userId}_${code}`), {
+        userId:    local.userId,
+        groupCode: code,
+        nickname:  nick,
+      });
+      const newGroup  = { groupCode: code, groupName: gName };
+      const updGroups = [...currentGroups, newGroup];
+      const updated   = await window.electronAPI.invoke('config:set', {
+        nickname: nick,
+        groups:   updGroups,
         pendingLogs: pendingLogsForNewGroup(),
       });
       onCfgChange(updated);
-      setLocal(p => ({ ...p, groupCode: code, nickname: nick, groupName: gName }));
+      setLocal(p => ({ ...p, nickname: nick, groups: updGroups }));
       setGroupView('main');
     } catch { setGroupErr('저장에 실패했어요. 그룹 코드를 확인해주세요.'); }
     finally { setGroupLoad(false); }
@@ -114,7 +136,14 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     setGroupLoad(true); setGroupErr('');
     try {
       const nick = nickDraft.trim();
-      await setDoc(doc(db, 'users', local.userId), { groupCode: local.groupCode, nickname: nick }, { merge: true });
+      // 모든 그룹 멤버십 닉네임 업데이트
+      for (const g of currentGroups) {
+        await setDoc(
+          doc(db, 'users', `${local.userId}_${g.groupCode}`),
+          { nickname: nick },
+          { merge: true },
+        );
+      }
       const updated = await window.electronAPI.invoke('config:set', { nickname: nick });
       onCfgChange(updated);
       setLocal(p => ({ ...p, nickname: nick }));
@@ -123,27 +152,28 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     finally { setGroupLoad(false); }
   }
 
-  async function leaveGroup() {
-    setGroupLoad(true); setGroupErr('');
+  async function leaveGroup(groupCode) {
+    setLeavingCode(groupCode); setGroupErr('');
     try {
-      const groupCode = local.groupCode;
-      await deleteDoc(doc(db, 'users', local.userId));
+      await deleteDoc(doc(db, 'users', `${local.userId}_${groupCode}`));
 
-      // 남은 멤버가 없으면 그룹 자체도 삭제
+      // 남은 멤버가 없으면 그룹 문서도 삭제
       const remaining = await getDocs(
-        query(collection(db, 'users'), where('group_code', '==', groupCode))
+        query(collection(db, 'users'), where('groupCode', '==', groupCode))
       );
       if (remaining.empty) {
         await deleteDoc(doc(db, 'groups', groupCode));
       }
 
-      const updated = await window.electronAPI.invoke('config:set', {
-        groupCode: null, nickname: null, groupName: null, pendingLogs: [],
+      const updGroups = currentGroups.filter(g => g.groupCode !== groupCode);
+      const updated   = await window.electronAPI.invoke('config:set', {
+        groups:      updGroups,
+        pendingLogs: updGroups.length === 0 ? [] : (local.pendingLogs || []),
       });
       onCfgChange(updated);
-      setLocal(p => ({ ...p, groupCode: null, nickname: null, groupName: null }));
+      setLocal(p => ({ ...p, groups: updGroups }));
     } catch { setGroupErr('그룹 나가기에 실패했어요.'); }
-    finally { setGroupLoad(false); }
+    finally { setLeavingCode(null); }
   }
 
   function copyCode(code) {
@@ -152,7 +182,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     setTimeout(() => setCodeCopied(false), 2000);
   }
 
-  // ── 그룹 만들기 ──────────────────────────────────────────────────────────────
+  // ── 그룹 만들기 서브뷰 ───────────────────────────────────────────────────────
   if (groupView === 'create') return (
     <div className="settings-root">
       <button className="st-back st-back-standalone" onClick={() => { setGroupView('main'); setGroupErr(''); }}>← 설정</button>
@@ -172,20 +202,20 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
             onChange={e => setGroupNameInput(e.target.value)} maxLength={20} />
         </div>
         <div className="st-field">
-          <label className="st-label">내 닉네임</label>
+          <label className="st-label">내 닉네임 <span className="st-optional">모든 그룹 공통</span></label>
           <input className="st-input" placeholder="예: 혜미" value={nickname}
             onChange={e => setNickname(e.target.value)} maxLength={12} />
         </div>
         {groupErr && <p className="st-error">{groupErr}</p>}
         <button className="st-submit-btn" disabled={!nickname.trim() || groupLoad}
-          onClick={() => saveGroup(createdCode, nickname.trim(), groupNameInput.trim())}>
+          onClick={() => addGroup(createdCode, nickname.trim(), groupNameInput.trim())}>
           {groupLoad ? '생성 중...' : '그룹 시작하기'}
         </button>
       </div>
     </div>
   );
 
-  // ── 그룹 참여하기 ─────────────────────────────────────────────────────────────
+  // ── 그룹 참여하기 서브뷰 ─────────────────────────────────────────────────────
   if (groupView === 'join') return (
     <div className="settings-root">
       <button className="st-back st-back-standalone" onClick={() => { setGroupView('main'); setGroupErr(''); }}>← 설정</button>
@@ -197,7 +227,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
             onChange={e => setCodeInput(e.target.value.toUpperCase())} maxLength={6} />
         </div>
         <div className="st-field">
-          <label className="st-label">내 닉네임</label>
+          <label className="st-label">내 닉네임 <span className="st-optional">모든 그룹 공통</span></label>
           <input className="st-input" placeholder="예: 혜미" value={nickname}
             onChange={e => setNickname(e.target.value)} maxLength={12} />
         </div>
@@ -211,7 +241,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     </div>
   );
 
-  // ── 메인 설정 ────────────────────────────────────────────────────────────────
+  // ── 메인 설정 ─────────────────────────────────────────────────────────────────
   return (
     <div className="settings-root">
 
@@ -232,7 +262,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
 
       <div className="st-scroll">
 
-        {/* ── 앱 설정 영역 ── */}
+        {/* ── 알림 설정 ── */}
         <div className="st-block">
           <p className="st-block-label">알림 설정</p>
 
@@ -296,100 +326,114 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
           </button>
         </div>
 
-        {/* ── 구분선 ── */}
         <div className="st-sections-divider" />
 
-        {/* ── 그룹 영역 ── */}
+        {/* ── 그룹 ── */}
         <div className="st-block">
           <p className="st-block-label">그룹</p>
 
-          {local.groupCode ? (
-            <div className="st-group-panel">
-              {/* 상단: 이름 + 코드 + 닉네임 */}
-              <div className="st-group-panel-body">
-                <div className="st-group-panel-status">
-                  <span className="st-active-dot" />
-                  <span className="st-active-label">참여 중</span>
+          {/* 닉네임 (그룹이 하나라도 있을 때 표시) */}
+          {currentGroups.length > 0 && (
+            <div className="st-nick-section">
+              {editingNick ? (
+                <div className="st-name-edit-wrap">
+                  <input className="st-input st-input-nick" autoFocus
+                    value={nickDraft} onChange={e => setNickDraft(e.target.value)}
+                    maxLength={12} placeholder="닉네임" />
+                  <button className="st-name-action save" onClick={saveNickname}
+                    disabled={groupLoad || !nickDraft.trim()}>저장</button>
+                  <button className="st-name-action cancel" onClick={() => setEditingNick(false)}>취소</button>
                 </div>
-
-                <div className="st-group-meta">
-                  <span className="st-group-code">{local.groupCode}</span>
-                  {editingNick ? (
-                    <div className="st-name-edit-wrap">
-                      <input className="st-input st-input-nick" autoFocus
-                        value={nickDraft} onChange={e => setNickDraft(e.target.value)}
-                        maxLength={12} placeholder="닉네임" />
-                      <button className="st-name-action save" onClick={saveNickname}
-                        disabled={groupLoad || !nickDraft.trim()}>저장</button>
-                      <button className="st-name-action cancel" onClick={() => setEditingNick(false)}>취소</button>
-                    </div>
-                  ) : (
-                    <div className="st-nick-row">
-                      <span className="st-nick-label">내 닉네임</span>
-                      <span className="st-nick-value">{local.nickname}</span>
-                      <button className="st-name-edit-btn" onClick={() => {
-                        setNickDraft(local.nickname || '');
-                        setEditingNick(true);
-                      }} aria-label="닉네임 수정">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-                  )}
+              ) : (
+                <div className="st-nick-row">
+                  <span className="st-nick-label">내 닉네임</span>
+                  <span className="st-nick-value">{local.nickname}</span>
+                  <button className="st-name-edit-btn" onClick={() => {
+                    setNickDraft(local.nickname || ''); setEditingNick(true);
+                  }} aria-label="닉네임 수정">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
-              </div>
-
-              {/* 하단: 나가기 */}
-              <div className="st-group-panel-footer">
-                {groupErr && <p className="st-error">{groupErr}</p>}
-                <button className="st-leave-btn" onClick={leaveGroup} disabled={groupLoad}>
-                  {groupLoad ? '처리 중...' : '그룹 나가기'}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="st-group-menu">
-              <button className="st-group-menu-row" onClick={() => {
-                setCreatedCode(generateCode()); setNickname(''); setGroupNameInput(''); setGroupErr(''); setGroupView('create');
-              }}>
-                <div className="st-group-menu-icon create">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <div className="st-group-menu-text">
-                  <span className="st-group-menu-title">새 그룹 만들기</span>
-                  <span className="st-group-menu-sub">코드를 생성해 팀원을 초대해요</span>
-                </div>
-                <svg className="st-group-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <div className="st-group-menu-divider" />
-              <button className="st-group-menu-row" onClick={() => {
-                setCodeInput(''); setNickname(''); setGroupErr(''); setGroupView('join');
-              }}>
-                <div className="st-group-menu-icon join">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M19 8v6M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </div>
-                <div className="st-group-menu-text">
-                  <span className="st-group-menu-title">기존 그룹 참여하기</span>
-                  <span className="st-group-menu-sub">초대 코드를 입력해 합류해요</span>
-                </div>
-                <svg className="st-group-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              )}
             </div>
           )}
-        </div>
 
+          {/* 그룹 목록 */}
+          {currentGroups.length > 0 && (
+            <div className="st-group-list">
+              {currentGroups.map(g => (
+                <div key={g.groupCode} className="st-group-item">
+                  <div className="st-group-item-info">
+                    <div className="st-group-item-name-row">
+                      <span className="st-active-dot" />
+                      <span className="st-group-item-name">{g.groupName || g.groupCode}</span>
+                    </div>
+                    <span className="st-group-item-code">{g.groupCode}</span>
+                  </div>
+                  <button
+                    className="st-leave-btn"
+                    onClick={() => leaveGroup(g.groupCode)}
+                    disabled={leavingCode === g.groupCode}
+                  >
+                    {leavingCode === g.groupCode ? '처리 중...' : '나가기'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {groupErr && <p className="st-error">{groupErr}</p>}
+
+          {/* 그룹 추가 메뉴 */}
+          <div className="st-group-menu">
+            <button className="st-group-menu-row" onClick={() => {
+              setCreatedCode(generateCode());
+              setNickname(local.nickname || '');
+              setGroupNameInput('');
+              setGroupErr('');
+              setGroupView('create');
+            }}>
+              <div className="st-group-menu-icon create">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="st-group-menu-text">
+                <span className="st-group-menu-title">새 그룹 만들기</span>
+                <span className="st-group-menu-sub">코드를 생성해 팀원을 초대해요</span>
+              </div>
+              <svg className="st-group-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <div className="st-group-menu-divider" />
+            <button className="st-group-menu-row" onClick={() => {
+              setCodeInput('');
+              setNickname(local.nickname || '');
+              setGroupErr('');
+              setGroupView('join');
+            }}>
+              <div className="st-group-menu-icon join">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M19 8v6M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="st-group-menu-text">
+                <span className="st-group-menu-title">기존 그룹 참여하기</span>
+                <span className="st-group-menu-sub">초대 코드를 입력해 합류해요</span>
+              </div>
+              <svg className="st-group-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+        </div>
       </div>
     </div>
   );
