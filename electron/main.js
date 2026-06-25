@@ -407,7 +407,7 @@ function rebuildTrayMenu() {
     items.push({ type: 'separator' });
   }
 
-  items.push({ label: '설정', click: openSettings });
+  items.push({ label: '열기', click: openSettings });
   items.push({ type: 'separator' });
   items.push({ label: '종료', click: () => app.quit() });
 
@@ -470,6 +470,7 @@ app.whenReady().then(() => {
   app.dock?.hide();
   app.setAppUserModelId('com.stretchwidget.app');
   createTray();
+  openSettings();
   scheduleNextAlarm();
   scheduleMidnightReset();
   if (!isDev) setupAutoUpdater();
