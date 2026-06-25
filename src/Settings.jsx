@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { db } from './firebase.js';
-import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, deleteDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import './App.css';
 
 const DAYS         = ['일', '월', '화', '수', '목', '금', '토'];
@@ -126,7 +126,17 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   async function leaveGroup() {
     setGroupLoad(true); setGroupErr('');
     try {
+      const groupCode = local.groupCode;
       await deleteDoc(doc(db, 'users', local.userId));
+
+      // 남은 멤버가 없으면 그룹 자체도 삭제
+      const remaining = await getDocs(
+        query(collection(db, 'users'), where('group_code', '==', groupCode))
+      );
+      if (remaining.empty) {
+        await deleteDoc(doc(db, 'groups', groupCode));
+      }
+
       const updated = await window.electronAPI.invoke('config:set', {
         groupCode: null, nickname: null, groupName: null, pendingLogs: [],
       });
