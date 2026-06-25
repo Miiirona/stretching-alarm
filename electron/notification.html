@@ -41,6 +41,18 @@
     }
     .label-title { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
     .label-sub   { font-size: 11.5px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .dev-badge {
+      display: inline-block;
+      background: #E74C3C;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
 
     /* ── Guide zone ── */
     .guide-zone {
@@ -338,7 +350,7 @@
         </svg>
       </div>
       <div>
-        <div class="label-title">스트레칭 할 시간이에요!</div>
+        <div class="label-title">스트레칭 할 시간이에요! <span class="dev-badge" id="devBadge" style="display:none">DEV</span></div>
         <div class="label-sub" id="guideSub">잠깐의 휴식이 건강을 지켜줍니다</div>
       </div>
     </div>
@@ -392,6 +404,7 @@
 
     // Parse URL params injected by main.js
     const params   = new URLSearchParams(location.search);
+    if (params.get('dev') === '1') document.getElementById('devBadge').style.display = 'inline-block';
     const guideIdx = parseInt(params.get('guide') ?? '0');
     const count    = parseInt(params.get('count') ?? '0');
     const goal     = parseInt(params.get('goal')  ?? '8');

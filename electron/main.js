@@ -40,7 +40,7 @@ app.on('second-instance', () => {
 const _iconDir = isDev
   ? path.join(__dirname, '../public')
   : path.join(process.resourcesPath, 'icons');
-const ICON_16  = path.join(_iconDir, 'icon-16.png');
+const ICON_16  = path.join(_iconDir, isDev ? 'icon-16-dev.png' : 'icon-16.png');
 const ICON_256 = path.join(_iconDir, 'icon-256.png');
 
 // --- Toast window dimensions ---
@@ -62,6 +62,7 @@ const DEFAULT_CONFIG = {
   groupCode:           null,
   nickname:            null,
   pendingLogs:         [],
+  todayLogs:           [], // 오늘 로컬 완료 기록 (타임스탬프 표시용, 자정 리셋)
   pendingInteractions: [], // 팝업 응답/무응답 로그 (대시보드 열 때 Firestore로 flush)
   dailyGoal:           8,
   dailyCount:          0,
@@ -116,6 +117,7 @@ function msUntilNextActiveStart(from = new Date()) {
 // --- Alarm state ---
 let alarmWindow  = null;
 let alarmTimer   = null;
+let nextAlarmAt  = null; // 다음 알람 예정 시각 (ms), 렌더러에 전달
 let dndUntil     = null;
 let dailyCount   = 0;
 let lastDateStr  = '';
@@ -127,7 +129,7 @@ function checkDailyReset() {
   if (lastDateStr !== today) {
     lastDateStr = today;
     dailyCount  = 0;
-    saveConfig({ dailyCount: 0, lastDateStr: today });
+    saveConfig({ dailyCount: 0, lastDateStr: today, todayLogs: [] });
   }
 }
 
@@ -158,6 +160,7 @@ function tick() {
   if (!isInActiveHours(now)) {
     const wait = msUntilNextActiveStart(now);
     console.log(`[Alarm] 가동 시간 외. ${Math.round(wait / 60000)}분 후 재시도`);
+    nextAlarmAt = Date.now() + wait;
     alarmTimer = setTimeout(tick, wait);
     return;
   }
@@ -165,6 +168,7 @@ function tick() {
   if (isDndActive()) {
     const wait = dndUntil - Date.now() + 1000;
     console.log(`[Alarm] DND 중. ${Math.round(wait / 60000)}분 후 재시도`);
+    nextAlarmAt = dndUntil;
     alarmTimer = setTimeout(tick, wait);
     return;
   }
@@ -184,12 +188,14 @@ function tick() {
   }
 
   showAlarm();
+  nextAlarmAt = Date.now() + getIntervalMs();
   alarmTimer = setTimeout(tick, getIntervalMs());
 }
 
 // 딜레이 후 tick 실행 (버튼 액션에서 사용)
 function scheduleNextAlarm(delayMs = getIntervalMs()) {
   clearTimeout(alarmTimer);
+  nextAlarmAt = Date.now() + delayMs;
   alarmTimer = setTimeout(tick, delayMs);
 }
 
@@ -245,6 +251,7 @@ function showAlarm() {
       guide: String(guideIndex),
       count: String(dailyCount),
       goal:  String(config.dailyGoal ?? 8),
+      dev:   isDev ? '1' : '0',
     },
   });
 
@@ -304,12 +311,14 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
     checkDailyReset();
     dailyCount++;
     guideIndex++;
-    const pendingLogs = [...(config.pendingLogs ?? []), { completedAt: new Date().toISOString() }];
-    saveConfig({ pendingLogs, pendingInteractions, dailyCount, lastDateStr });
-    if (settingsWindow && !settingsWindow.isDestroyed()) {
-      settingsWindow.webContents.send('config:updated', { ...config, dailyCount });
-    }
+    const completedAt = new Date().toISOString();
+    const pendingLogs = [...(config.pendingLogs ?? []), { completedAt }];
+    const todayLogs   = [...(config.todayLogs   ?? []), { completedAt }];
+    saveConfig({ pendingLogs, todayLogs, pendingInteractions, dailyCount, lastDateStr });
     scheduleNextAlarm();
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
+    }
   } else if (action === 'snooze') {
     saveConfig({ pendingInteractions });
     scheduleNextAlarm(5 * 60 * 1000);
@@ -321,16 +330,15 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
 });
 
 ipcMain.handle('config:get', () => {
-  checkDailyReset(); // UI가 열릴 때마다 날짜 변경 여부 확인
-  return { ...config, dailyCount };
+  checkDailyReset();
+  return { ...config, dailyCount, isDev, nextAlarmAt };
 });
 ipcMain.handle('config:set', (_, updates) => {
   saveConfig(updates);
-  // config:set으로 dailyCount / lastDateStr 을 받으면 런타임 변수도 동기화
   if ('dailyCount'  in updates) dailyCount  = updates.dailyCount;
   if ('lastDateStr' in updates) lastDateStr = updates.lastDateStr;
   scheduleNextAlarm();
-  return { ...config, dailyCount };
+  return { ...config, dailyCount, isDev, nextAlarmAt };
 });
 
 // --- Settings window ---
@@ -427,7 +435,7 @@ function scheduleMidnightReset() {
     checkDailyReset();
     // settingsWindow(대시보드)가 열려 있으면 리셋된 값 즉시 반영
     if (settingsWindow && !settingsWindow.isDestroyed()) {
-      settingsWindow.webContents.send('config:updated', { ...config, dailyCount });
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
     }
     scheduleMidnightReset(); // 다음 날 자정 예약
   }, delay);

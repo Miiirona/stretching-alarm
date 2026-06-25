@@ -254,6 +254,7 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             </svg>
           </div>
           <span className="dash-brand-name">StretchWidget</span>
+          {cfg.isDev && <span className="dash-dev-badge">DEV</span>}
         </div>
         <button className="dash-gear" onClick={onSettingsOpen} aria-label="설정">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -301,6 +302,36 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             <span className="dash-schedule-sep">·</span>
             <span className="dash-schedule-info">{fmtInterval(cfg.intervalMinutes)}</span>
           </div>
+
+          {/* 다음 알림 예정 시각 */}
+          {cfg.nextAlarmAt && Date.now() < cfg.nextAlarmAt && (
+            <div className="dash-next-alarm">
+              <span className="dash-next-alarm-label">다음 알림</span>
+              <span className="dash-next-alarm-time">
+                {new Date(cfg.nextAlarmAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+              </span>
+            </div>
+          )}
+
+          {/* 오늘 완료 기록 타임스탬프 */}
+          {cfg.todayLogs?.length > 0 && (
+            <>
+              <div className="dash-group-divider" style={{ margin: '12px 0 10px' }} />
+              <div className="dash-log-list">
+                {[...cfg.todayLogs].reverse().map((log, i) => {
+                  const t = new Date(log.completedAt);
+                  return (
+                    <div key={i} className="dash-log-item">
+                      <span className="dash-log-time">
+                        {String(t.getHours()).padStart(2,'0')}:{String(t.getMinutes()).padStart(2,'0')}
+                      </span>
+                      <span className="dash-log-label">스트레칭 완료</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </section>
 
         {/* ── 그룹 현황 ── */}

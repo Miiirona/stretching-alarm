@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── PNG builder ────────────────────────────────────────────────────────────────
-function buildIconPng(size) {
+function buildIconPng(size, color = [0, 184, 148]) {
   const W = size, H = size;
   const pixels = new Uint8Array(W * H * 4); // RGBA, transparent
 
@@ -41,7 +41,7 @@ function buildIconPng(size) {
 
   const s = size / 256;
   const cx = W / 2;
-  const [TR, TG, TB] = [0, 184, 148]; // #00B894
+  const [TR, TG, TB] = color;
 
   // Bell silhouette — all coords in 256-space, scaled by s
 
@@ -152,6 +152,12 @@ for (const size of [16, 32, 48, 256, 512]) {
   writeFileSync(out, pngs[size]);
   console.log(`✓ public/icon-${size}.png  (${pngs[size].length} B)`);
 }
+
+// Dev 전용: 빨간 벨 (트레이 아이콘)
+const devPng = buildIconPng(16, [231, 76, 60]); // #E74C3C
+writeFileSync(path.join(publicDir, 'icon-16-dev.png'), devPng);
+console.log(`✓ public/icon-16-dev.png  (${devPng.length} B, dev)`);
+
 
 // ICO bundles 16 / 32 / 48 / 256 — used by electron-builder for NSIS & MSIX
 const ico = buildIco([16, 32, 48, 256].map(s => ({ size: s, buf: pngs[s] })));
