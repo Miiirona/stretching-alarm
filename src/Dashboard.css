@@ -7,7 +7,7 @@
   color: #e8e8f0;
   font-family: -apple-system, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   -webkit-font-smoothing: antialiased;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ── Header ── */
@@ -31,7 +31,7 @@
   flex-shrink: 0;
 }
 .dash-brand-name {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.4px;
@@ -76,7 +76,7 @@
   padding: 18px;
 }
 .dash-card-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -97,14 +97,14 @@
   flex-shrink: 0;
 }
 .dash-count-num {
-  font-size: 52px;
+  font-size: 56px;
   font-weight: 800;
   color: #00d4a8;
   line-height: 1;
   letter-spacing: -2px;
 }
 .dash-count-denom {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(255,255,255,0.3);
   margin-top: 3px;
 }
@@ -128,7 +128,7 @@
   transform: translateX(-50%);
   background: rgba(15, 15, 22, 0.96);
   color: rgba(255,255,255,0.85);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 6px;
@@ -169,7 +169,7 @@
   margin-bottom: 12px;
 }
 .dash-count-badge {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: rgba(255,255,255,0.35);
 }
@@ -185,7 +185,7 @@
   flex-wrap: wrap;
 }
 .dash-day-chip {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 6px;
@@ -199,11 +199,11 @@
   border-color: rgba(0,184,148,0.3);
 }
 .dash-schedule-sep {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,0.15);
 }
 .dash-schedule-info {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(255,255,255,0.4);
 }
 
@@ -253,7 +253,7 @@
   gap: 8px;
 }
 .dash-group-name {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.5px;
@@ -282,7 +282,7 @@
   border-radius: 8px;
   padding: 7px 11px;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   font-family: inherit;
   outline: none;
@@ -292,7 +292,7 @@
   padding: 7px 12px;
   border-radius: 8px;
   border: none;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -307,13 +307,13 @@
   gap: 8px;
 }
 .dash-group-code-small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: rgba(255,255,255,0.3);
   letter-spacing: 2px;
 }
 .dash-group-me-badge {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255,255,255,0.4);
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.08);
@@ -334,7 +334,7 @@
   border: 1px solid rgba(255,255,255,0.09);
   background: rgba(255,255,255,0.04);
   color: rgba(255,255,255,0.38);
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
@@ -370,12 +370,12 @@
   margin-bottom: 9px;
 }
 .dash-team-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(255,255,255,0.45);
 }
 .dash-team-pct {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #00d4a8;
   letter-spacing: -0.5px;
@@ -394,7 +394,7 @@
   transition: width 0.7s ease;
 }
 .dash-team-detail {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: rgba(255,255,255,0.28);
 }
 
@@ -420,7 +420,7 @@
   width: 28px; height: 28px;
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   flex-shrink: 0;
   background: rgba(255,255,255,0.07);
@@ -430,7 +430,7 @@
 .dash-rank.r2,
 .dash-rank.r3 {
   background: none;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 /* 멤버 본문 */
@@ -448,7 +448,7 @@
   min-width: 0;
 }
 .dash-member-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
@@ -456,7 +456,7 @@
   text-overflow: ellipsis;
 }
 .dash-me-tag {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #00B894;
   background: rgba(0,184,148,0.12);
@@ -465,7 +465,7 @@
   flex-shrink: 0;
 }
 .dash-member-cnt {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: rgba(255,255,255,0.45);
   flex-shrink: 0;
@@ -499,7 +499,7 @@
 }
 .dash-no-group-icon { opacity: 0.5; }
 .dash-no-group-text {
-  font-size: 14px;
+  font-size: 15px;
   color: rgba(255,255,255,0.3);
   line-height: 1.7;
   margin: 0;
@@ -510,7 +510,7 @@
   border: 1px solid rgba(0,184,148,0.4);
   background: rgba(0,184,148,0.1);
   color: #00d4a8;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -520,7 +520,7 @@
 
 /* ── 자리비움 배지 ── */
 .dash-away-badge {
-  font-size: 11px;
+  font-size: 12px;
   color: rgba(255,255,255,0.3);
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.08);
@@ -532,7 +532,7 @@
 
 /* 반차 목표 표시 (/4) */
 .dash-member-goal-note {
-  font-size: 11px;
+  font-size: 12px;
   color: rgba(255,255,255,0.25);
   font-weight: 400;
   margin-left: 1px;
@@ -552,7 +552,7 @@
   border: 1px dashed rgba(231, 76, 60, 0.4);
   background: rgba(231, 76, 60, 0.06);
   color: rgba(231, 76, 60, 0.7);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -583,12 +583,12 @@
   margin-bottom: 7px;
 }
 .dash-next-inline {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: rgba(255,255,255,0.38);
   font-variant-numeric: tabular-nums;
 }
 .dash-dnd-inline {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: rgba(240, 165, 0, 0.75);
   font-variant-numeric: tabular-nums;
 }
@@ -596,7 +596,7 @@
   background: none;
   border: none;
   padding: 0;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   font-family: inherit;
   color: rgba(240, 165, 0, 0.55);
@@ -614,12 +614,12 @@
 .dash-group-loading,
 .dash-empty {
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
   color: rgba(255,255,255,0.25);
   padding: 20px 0;
 }
 .dash-error {
-  font-size: 13px;
+  font-size: 14px;
   color: #ff7675;
   margin: 4px 0 0;
 }
