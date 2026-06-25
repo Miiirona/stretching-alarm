@@ -322,10 +322,17 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
   } else if (action === 'snooze') {
     saveConfig({ pendingInteractions });
     scheduleNextAlarm(5 * 60 * 1000);
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
+    }
   } else if (action === 'dnd') {
     saveConfig({ pendingInteractions });
     setDnd(value);
     scheduleNextAlarm();
+    nextAlarmAt = dndUntil; // 방해금지 종료 시각을 다음 알림으로 표시
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
+    }
   }
 });
 
