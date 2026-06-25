@@ -372,6 +372,13 @@
   align-items: center;
   gap: 8px;
 }
+.dash-group-header .dash-mode-row {
+  margin-bottom: 0;
+}
+.dash-group-header .dash-mode-pill {
+  flex: none;
+  padding: 7px 16px;
+}
 
 /* ── 팀 달성률 ── */
 .dash-team-gauge {
