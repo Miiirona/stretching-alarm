@@ -469,6 +469,12 @@ app.whenReady().then(() => {
   checkDailyReset(); // 날짜가 바뀌었으면 리셋
   app.dock?.hide();
   app.setAppUserModelId('com.stretchwidget.app');
+
+  // 로그인 시 자동 시작 (패키징된 앱에서만)
+  if (!isDev) {
+    app.setLoginItemSettings({ openAtLogin: true, openAsHidden: true });
+  }
+
   createTray();
   openSettings();
   scheduleNextAlarm();
