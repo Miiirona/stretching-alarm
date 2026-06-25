@@ -442,7 +442,6 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
               )}
               <div className="dash-group-sub">
                 <span className="dash-group-code-small">{cfg.groupCode}</span>
-                <span className="dash-group-me-badge">나 · {cfg.nickname}</span>
               </div>
             </div>
 

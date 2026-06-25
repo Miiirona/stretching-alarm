@@ -466,17 +466,18 @@ html, body {
 }
 .st-name-edit-btn {
   background: none;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 6px;
-  color: rgba(255,255,255,0.4);
+  border: none;
+  color: rgba(255,255,255,0.3);
   font-size: 12px;
   font-family: inherit;
-  padding: 3px 9px;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s;
   flex-shrink: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
-.st-name-edit-btn:hover { border-color: rgba(0,184,148,0.4); color: #00d4a8; }
+.st-name-edit-btn:hover { color: #00d4a8; }
 .st-name-edit-wrap {
   display: flex;
   align-items: center;
@@ -501,9 +502,8 @@ html, body {
 .st-name-action.cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
 .st-group-meta {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
 }
 .st-group-code {
   font-size: 17px;
@@ -511,17 +511,21 @@ html, body {
   color: #00d4a8;
   letter-spacing: 3px;
 }
-.st-group-nick-badge {
-  font-size: 13px;
-  color: rgba(255,255,255,0.45);
-  background: rgba(255,255,255,0.07);
-  padding: 2px 8px;
-  border-radius: 5px;
-}
 .st-nick-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+.st-nick-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+.st-nick-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  flex: 1;
 }
 .st-input-nick {
   width: 100px;

@@ -315,7 +315,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
                     </div>
                   ) : (
                     <div className="st-nick-row">
-                      <span className="st-group-nick-badge">{local.nickname}</span>
+                      <span className="st-nick-label">내 닉네임</span>
+                      <span className="st-nick-value">{local.nickname}</span>
                       <button className="st-name-edit-btn" onClick={() => {
                         setNickDraft(local.nickname || '');
                         setEditingNick(true);
