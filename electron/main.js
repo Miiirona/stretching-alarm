@@ -471,12 +471,20 @@ app.whenReady().then(() => {
   app.setAppUserModelId('com.stretchwidget.app');
 
   // 로그인 시 자동 시작 (패키징된 앱에서만)
+  // --hidden 플래그: Windows에서 부팅 자동 시작 시 창 없이 트레이만 뜨도록
+  const startHidden = process.argv.includes('--hidden')
+    || (app.getLoginItemSettings().wasOpenedAsHidden ?? false);
+
   if (!isDev) {
-    app.setLoginItemSettings({ openAtLogin: true, openAsHidden: true });
+    app.setLoginItemSettings({
+      openAtLogin: true,
+      openAsHidden: true,   // macOS: 창 없이 시작
+      args: ['--hidden'],   // Windows: 위 플래그 전달
+    });
   }
 
   createTray();
-  openSettings();
+  if (!startHidden) openSettings();
   scheduleNextAlarm();
   scheduleMidnightReset();
   if (!isDev) setupAutoUpdater();
