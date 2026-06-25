@@ -125,10 +125,11 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
         counts[uid] = (counts[uid] || 0) + 1;
       });
 
-      // 오늘 탭: Firestore 값이 정답 — flush 완료 후 로컬과 불일치 시 동기화
+      // 오늘 탭: Firestore 값이 로컬보다 높을 때만 동기화 (UP 방향만)
+      // 새 그룹 생성 직후 Firestore=0 이어도 로컬 기록을 덮어쓰지 않음
       if (isToday) {
         const fsCount = counts[cfg.userId] ?? 0;
-        if (fsCount !== count) {
+        if (fsCount > count) {
           const upd = await window.electronAPI.invoke('config:set', {
             dailyCount:  fsCount,
             lastDateStr: new Date().toDateString(),
@@ -285,25 +286,58 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             </span>
           </div>
 
-          {/* 도트 */}
-          <div className="dash-dots">
-            {Array.from({ length: DAILY_GOAL }).map((_, i) => (
-              <div key={i} className={`dash-dot${i < count ? ' on' : ''}`} />
-            ))}
+          {/* 도트 — hover 시 완료 시각 툴팁, 초과분은 2열째 추가 */}
+          <div className="dash-dots" style={{ gridTemplateColumns: `repeat(${DAILY_GOAL}, 1fr)` }}>
+            {(() => {
+              // 최신 count개만 사용: todayLogs 앞쪽에 쌓인 이전 세션 잔여 데이터 무시
+              const logs = (cfg.todayLogs ?? []).slice(-count);
+              return Array.from({ length: Math.max(DAILY_GOAL, count) }).map((_, i) => {
+                const t = logs[i] ? new Date(logs[i].completedAt) : null;
+                const timeStr = (i < count && t)
+                  ? `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`
+                  : undefined;
+                const isBonus = i >= DAILY_GOAL;
+                return (
+                  <div key={i} className="dash-dot-wrap" data-time={timeStr}>
+                    <div className={`dash-dot${i < count ? (isBonus ? ' bonus' : ' on') : ''}`} />
+                  </div>
+                );
+              });
+            })()}
           </div>
 
-          {/* 완료 시각 칩 — 게이지 바로 아래 */}
-          {cfg.todayLogs?.length > 0 && (
-            <div className="dash-log-chips">
-              {cfg.todayLogs.map((log, i) => {
-                const t = new Date(log.completedAt);
-                return (
-                  <span key={i} className="dash-log-chip">
-                    {String(t.getHours()).padStart(2,'0')}:{String(t.getMinutes()).padStart(2,'0')}
-                  </span>
-                );
-              })}
-            </div>
+          {/* DEV 전용: 오늘 기록 초기화 */}
+          {cfg.isDev && (
+            <button
+              className="dash-dev-reset"
+              onClick={async () => {
+                // Firestore 오늘 기록 삭제 (그룹이 있을 때)
+                if (cfg.groupCode && cfg.userId) {
+                  try {
+                    const snap = await getDocs(query(
+                      collection(db, 'stretching_logs'),
+                      where('userId', '==', cfg.userId),
+                      where('date', '==', todayStr()),
+                    ));
+                    if (!snap.empty) {
+                      const batch = writeBatch(db);
+                      snap.forEach(d => batch.delete(d.ref));
+                      await batch.commit();
+                    }
+                  } catch (e) {
+                    console.warn('[DEV reset] Firestore 삭제 실패:', e.message);
+                  }
+                }
+                // 로컬 config 초기화
+                const upd = await window.electronAPI.invoke('config:set', {
+                  dailyCount: 0, todayLogs: [], pendingLogs: [],
+                  lastDateStr: new Date().toDateString(),
+                });
+                onCfgChange(upd);
+              }}
+            >
+              [DEV] 오늘 기록 초기화
+            </button>
           )}
 
           <div className="dash-group-divider" style={{ margin: '14px 0 12px' }} />

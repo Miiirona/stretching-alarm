@@ -344,7 +344,9 @@ ipcMain.handle('config:set', (_, updates) => {
   saveConfig(updates);
   if ('dailyCount'  in updates) dailyCount  = updates.dailyCount;
   if ('lastDateStr' in updates) lastDateStr = updates.lastDateStr;
-  scheduleNextAlarm();
+  // 알람 관련 설정이 바뀔 때만 재스케줄 (그룹/닉네임 저장 등에서는 타이머 건드리지 않음)
+  const alarmKeys = new Set(['intervalMinutes', 'startHour', 'endHour', 'activeDays']);
+  if (Object.keys(updates).some(k => alarmKeys.has(k))) scheduleNextAlarm();
   return { ...config, dailyCount, isDev, nextAlarmAt };
 });
 

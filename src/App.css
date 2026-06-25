@@ -503,6 +503,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 .st-group-code {
   font-size: 17px;
@@ -516,6 +517,15 @@ html, body {
   background: rgba(255,255,255,0.07);
   padding: 2px 8px;
   border-radius: 5px;
+}
+.st-nick-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.st-input-nick {
+  width: 100px;
+  font-weight: 600;
 }
 .st-leave-btn {
   align-self: flex-start;

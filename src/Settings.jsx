@@ -41,8 +41,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   const [codeCopied,     setCodeCopied]     = useState(false);
   const [groupLoad,      setGroupLoad]      = useState(false);
   const [groupErr,       setGroupErr]       = useState('');
-  const [editingName,    setEditingName]    = useState(false);
-  const [nameDraft,      setNameDraft]      = useState('');
+  const [editingNick,    setEditingNick]    = useState(false);
+  const [nickDraft,      setNickDraft]      = useState('');
 
   const update = (key, val) => { setLocal(p => ({ ...p, [key]: val })); setSaveState('idle'); };
   const toggleDay = (idx) => {
@@ -98,16 +98,16 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     finally { setGroupLoad(false); }
   }
 
-  async function saveGroupName() {
+  async function saveNickname() {
     setGroupLoad(true); setGroupErr('');
     try {
-      const name = nameDraft.trim();
-      await setDoc(doc(db, 'groups', local.groupCode), { groupName: name }, { merge: true });
-      const updated = await window.electronAPI.invoke('config:set', { groupName: name || null });
+      const nick = nickDraft.trim();
+      await setDoc(doc(db, 'users', local.userId), { groupCode: local.groupCode, nickname: nick }, { merge: true });
+      const updated = await window.electronAPI.invoke('config:set', { nickname: nick });
       onCfgChange(updated);
-      setLocal(p => ({ ...p, groupName: name || null }));
-      setEditingName(false);
-    } catch { setGroupErr('이름 저장에 실패했어요.'); }
+      setLocal(p => ({ ...p, nickname: nick }));
+      setEditingNick(false);
+    } catch { setGroupErr('닉네임 저장에 실패했어요.'); }
     finally { setGroupLoad(false); }
   }
 
@@ -290,29 +290,26 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
                   <span className="st-active-label">참여 중</span>
                 </div>
 
-                {editingName ? (
-                  <div className="st-name-edit-wrap">
-                    <input className="st-input st-input-name" autoFocus
-                      value={nameDraft} onChange={e => setNameDraft(e.target.value)}
-                      maxLength={20} placeholder="그룹 이름" />
-                    <button className="st-name-action save" onClick={saveGroupName} disabled={groupLoad}>저장</button>
-                    <button className="st-name-action cancel" onClick={() => setEditingName(false)}>취소</button>
-                  </div>
-                ) : (
-                  <div className="st-group-name-row">
-                    <span className="st-group-name-display">
-                      {local.groupName || <span className="st-no-name">이름 없음</span>}
-                    </span>
-                    <button className="st-name-edit-btn" onClick={() => {
-                      setNameDraft(local.groupName || '');
-                      setEditingName(true);
-                    }}>수정</button>
-                  </div>
-                )}
-
                 <div className="st-group-meta">
                   <span className="st-group-code">{local.groupCode}</span>
-                  <span className="st-group-nick-badge">{local.nickname}</span>
+                  {editingNick ? (
+                    <div className="st-name-edit-wrap">
+                      <input className="st-input st-input-nick" autoFocus
+                        value={nickDraft} onChange={e => setNickDraft(e.target.value)}
+                        maxLength={12} placeholder="닉네임" />
+                      <button className="st-name-action save" onClick={saveNickname}
+                        disabled={groupLoad || !nickDraft.trim()}>저장</button>
+                      <button className="st-name-action cancel" onClick={() => setEditingNick(false)}>취소</button>
+                    </div>
+                  ) : (
+                    <div className="st-nick-row">
+                      <span className="st-group-nick-badge">{local.nickname}</span>
+                      <button className="st-name-edit-btn" onClick={() => {
+                        setNickDraft(local.nickname || '');
+                        setEditingNick(true);
+                      }}>수정</button>
+                    </div>
+                  )}
                 </div>
               </div>
 
