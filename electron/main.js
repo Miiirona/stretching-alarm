@@ -317,13 +317,13 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
     saveConfig({ pendingLogs, todayLogs, pendingInteractions, dailyCount, lastDateStr });
     scheduleNextAlarm();
     if (settingsWindow && !settingsWindow.isDestroyed()) {
-      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt, dndUntil });
     }
   } else if (action === 'snooze') {
     saveConfig({ pendingInteractions });
     scheduleNextAlarm(5 * 60 * 1000);
     if (settingsWindow && !settingsWindow.isDestroyed()) {
-      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt, dndUntil });
     }
   } else if (action === 'dnd') {
     saveConfig({ pendingInteractions });
@@ -331,14 +331,14 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
     scheduleNextAlarm();
     nextAlarmAt = dndUntil; // 방해금지 종료 시각을 다음 알림으로 표시
     if (settingsWindow && !settingsWindow.isDestroyed()) {
-      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt });
+      settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt, dndUntil });
     }
   }
 });
 
 ipcMain.handle('config:get', () => {
   checkDailyReset();
-  return { ...config, dailyCount, isDev, nextAlarmAt };
+  return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
 });
 ipcMain.handle('config:set', (_, updates) => {
   saveConfig(updates);
@@ -347,7 +347,16 @@ ipcMain.handle('config:set', (_, updates) => {
   // 알람 관련 설정이 바뀔 때만 재스케줄 (그룹/닉네임 저장 등에서는 타이머 건드리지 않음)
   const alarmKeys = new Set(['intervalMinutes', 'startHour', 'endHour', 'activeDays']);
   if (Object.keys(updates).some(k => alarmKeys.has(k))) scheduleNextAlarm();
-  return { ...config, dailyCount, isDev, nextAlarmAt };
+  return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
+});
+
+ipcMain.handle('dnd:cancel', () => {
+  dndUntil = null;
+  scheduleNextAlarm();
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt, dndUntil });
+  }
+  return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
 });
 
 // --- Settings window ---

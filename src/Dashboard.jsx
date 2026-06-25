@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { db } from './firebase.js';
 import {
   doc, getDoc, getDocs, writeBatch, setDoc, Timestamp,
@@ -55,14 +55,16 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
       const ttl = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30일 TTL
 
       // ── 미동기화 스트레칭 완료 로그 flush ──
+      // completedAt을 문서 ID로 사용 → 동일 로그가 중복 flush돼도 덮어쓰기(멱등성 보장)
       if (cfg.pendingLogs?.length > 0) {
         const batch = writeBatch(db);
         for (const log of cfg.pendingLogs) {
-          const ref = doc(collection(db, 'stretching_logs'));
+          const docId = `${cfg.userId}_${log.completedAt.replace(/[:.]/g, '-')}`;
+          const ref = doc(db, 'stretching_logs', docId);
           batch.set(ref, {
             userId:      cfg.userId,
             groupCode:   cfg.groupCode,
-            date:        localDate(new Date(log.completedAt)), // 로컬 날짜 기준
+            date:        localDate(new Date(log.completedAt)),
             completedAt: log.completedAt,
             expireAt:    Timestamp.fromDate(ttl),
           });
@@ -76,13 +78,14 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
       if (cfg.pendingInteractions?.length > 0) {
         const batch2 = writeBatch(db);
         for (const interaction of cfg.pendingInteractions) {
-          const ref = doc(collection(db, 'interaction_logs'));
+          const docId = `${cfg.userId}_${interaction.occurredAt.replace(/[:.]/g, '-')}`;
+          const ref = doc(db, 'interaction_logs', docId);
           batch2.set(ref, {
             userId:     cfg.userId,
             groupCode:  cfg.groupCode,
             type:       interaction.type,
             occurredAt: interaction.occurredAt,
-            date:       localDate(new Date(interaction.occurredAt)), // 로컬 날짜 기준
+            date:       localDate(new Date(interaction.occurredAt)),
             expireAt:   Timestamp.fromDate(ttl),
           });
         }
@@ -199,6 +202,16 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
     else setMembers([]);
   }, [cfg?.groupCode, mode]); // eslint-disable-line
 
+  // 스트레칭 완료로 dailyCount가 오르면 그룹 현황 자동 동기화
+  const prevDailyCount = useRef(null);
+  useEffect(() => {
+    const c = cfg?.dailyCount ?? 0;
+    if (prevDailyCount.current !== null && c > prevDailyCount.current && cfg?.groupCode) {
+      fetchGroup(mode);
+    }
+    prevDailyCount.current = c;
+  }, [cfg?.dailyCount]); // eslint-disable-line
+
   const handleModeChange = (m) => { setMode(m); fetchGroup(m); };
 
   async function saveGroupName() {
@@ -286,6 +299,42 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             </span>
           </div>
 
+          {/* 도트 헤더: 다음 알림 / 방해금지 — 우측 정렬, 배경 없음 */}
+          {(() => {
+            const isDnd = cfg.dndUntil && Date.now() < cfg.dndUntil;
+            const fmtTime = (ms) => {
+              const d = new Date(ms);
+              const t = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+              return d.toDateString() === new Date().toDateString() ? t : `내일 ${t}`;
+            };
+            if (isDnd) {
+              return (
+                <div className="dash-dots-meta">
+                  <span className="dash-dnd-inline">
+                    🔕 방해금지 중 · {fmtTime(cfg.dndUntil)}까지
+                  </span>
+                  <button
+                    className="dash-dnd-inline-cancel"
+                    onClick={async () => {
+                      const upd = await window.electronAPI.invoke('dnd:cancel');
+                      onCfgChange(upd);
+                    }}
+                  >
+                    해제
+                  </button>
+                </div>
+              );
+            }
+            if (cfg.nextAlarmAt && Date.now() < cfg.nextAlarmAt) {
+              return (
+                <div className="dash-dots-meta">
+                  <span className="dash-next-inline">다음 알림 {fmtTime(cfg.nextAlarmAt)}</span>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {/* 도트 — hover 시 완료 시각 툴팁, 초과분은 2열째 추가 */}
           <div className="dash-dots" style={{ gridTemplateColumns: `repeat(${DAILY_GOAL}, 1fr)` }}>
             {(() => {
@@ -351,15 +400,6 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             <span className="dash-schedule-info">{fmtInterval(cfg.intervalMinutes)}</span>
           </div>
 
-          {/* 다음 알림 예정 시각 */}
-          {cfg.nextAlarmAt && Date.now() < cfg.nextAlarmAt && (
-            <div className="dash-next-alarm">
-              <span className="dash-next-alarm-label">다음 알림</span>
-              <span className="dash-next-alarm-time">
-                {new Date(cfg.nextAlarmAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
-              </span>
-            </div>
-          )}
 
         </section>
 

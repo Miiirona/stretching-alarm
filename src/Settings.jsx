@@ -67,13 +67,24 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
     }
   };
 
+  // 새 그룹용 pendingLogs 계산:
+  // 미전송 로그가 있으면 그대로 사용(새 그룹 코드로 flush), 없으면 todayLogs에서 재등록
+  function pendingLogsForNewGroup() {
+    const existing = cfg.pendingLogs ?? [];
+    if (existing.length > 0) return existing;
+    const count = cfg.dailyCount ?? 0;
+    if (count <= 0) return [];
+    return (cfg.todayLogs ?? []).slice(-count);
+  }
+
   async function saveGroup(groupCode, nick, gName = '') {
     setGroupLoad(true); setGroupErr('');
     try {
       if (gName) await setDoc(doc(db, 'groups', groupCode), { groupName: gName });
       await setDoc(doc(db, 'users', local.userId), { groupCode, nickname: nick });
       const updated = await window.electronAPI.invoke('config:set', {
-        groupCode, nickname: nick, groupName: gName || null, pendingLogs: [],
+        groupCode, nickname: nick, groupName: gName || null,
+        pendingLogs: pendingLogsForNewGroup(),
       });
       onCfgChange(updated);
       setLocal(p => ({ ...p, groupCode, nickname: nick, groupName: gName || null }));
@@ -89,7 +100,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
       const gName = groupDoc.exists() ? (groupDoc.data().groupName || null) : null;
       await setDoc(doc(db, 'users', local.userId), { groupCode: code, nickname: nick });
       const updated = await window.electronAPI.invoke('config:set', {
-        groupCode: code, nickname: nick, groupName: gName, pendingLogs: [],
+        groupCode: code, nickname: nick, groupName: gName,
+        pendingLogs: pendingLogsForNewGroup(),
       });
       onCfgChange(updated);
       setLocal(p => ({ ...p, groupCode: code, nickname: nick, groupName: gName }));
