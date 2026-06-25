@@ -467,15 +467,13 @@ html, body {
 .st-name-edit-btn {
   background: none;
   border: none;
-  color: rgba(255,255,255,0.3);
-  font-size: 12px;
-  font-family: inherit;
-  padding: 0;
+  color: rgba(255,255,255,0.28);
+  padding: 2px;
   cursor: pointer;
   transition: color 0.15s;
   flex-shrink: 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  display: flex;
+  align-items: center;
 }
 .st-name-edit-btn:hover { color: #00d4a8; }
 .st-name-edit-wrap {
