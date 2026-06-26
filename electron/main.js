@@ -407,7 +407,7 @@ function rebuildTrayMenu() {
   }
 
   if (updateReady) {
-    items.push({ label: '재시작하여 업데이트 설치', click: () => autoUpdater.quitAndInstall() });
+    items.push({ label: '재시작하여 업데이트 설치', click: () => autoUpdater.quitAndInstall(true, true) });
     items.push({ type: 'separator' });
   }
 
