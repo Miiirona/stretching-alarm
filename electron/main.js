@@ -448,6 +448,8 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.checkForUpdates();
+  // 4시간마다 재확인 (앱 장시간 켜둔 경우 대비)
+  setInterval(() => autoUpdater.checkForUpdates(), 4 * 60 * 60 * 1000);
 }
 
 // --- 자정 자동 리셋 타이머 ---
