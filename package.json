@@ -1,7 +1,7 @@
 {
   "name": "stretching-alarm",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "직장인을 위한 정기 스트레칭 알림 위젯",
   "author": "Hyemi So",
   "type": "module",

@@ -111,12 +111,15 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
         const groupDoc = await getDoc(doc(db, 'groups', g.groupCode));
         const gName = groupDoc.exists() ? (groupDoc.data().groupName || '') : g.groupName || '';
 
-        // 멤버 목록 (userId 필드로 조회)
+        // 멤버 목록 — v1.0.1 이전 doc은 userId 필드 없이 doc.id = userId 형식이므로 fallback 처리
         const usersSnap = await getDocs(
           query(collection(db, 'users'), where('groupCode', '==', g.groupCode))
         );
         const userMap = { [cfg.userId]: cfg.nickname };
-        usersSnap.forEach(d => { userMap[d.data().userId] = d.data().nickname; });
+        usersSnap.forEach(d => {
+          const uid = d.data().userId ?? d.id;
+          userMap[uid] = d.data().nickname;
+        });
 
         // 완료 횟수 집계
         const logsSnap = await getDocs(
