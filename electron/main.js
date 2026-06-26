@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, dialog, shell } from 'electron';
+import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen } from 'electron';
 import electronUpdater from 'electron-updater';
 const { autoUpdater } = electronUpdater;
 import { fileURLToPath } from 'url';
@@ -440,28 +440,11 @@ function setupAutoUpdater() {
     rebuildTrayMenu();
   });
 
-  let errorDialogShown = false;
   autoUpdater.on('error', (err) => {
     console.error('[updater]', err.message);
     tray?.setToolTip('StretchWidget');
-    if (errorDialogShown) return;
-    // 네트워크 오류(오프라인 등)는 조용히 무시
-    const isNetworkError = /net::|ENOTFOUND|ECONNREFUSED|ETIMEDOUT/.test(err.message ?? '');
-    if (isNetworkError) return;
-    errorDialogShown = true;
-    dialog.showMessageBox({
-      type: 'warning',
-      title: '업데이트 오류',
-      message: '자동 업데이트에 실패했습니다.',
-      detail: '수동으로 최신 버전을 다운로드하시겠습니까?',
-      buttons: ['다운로드 페이지 열기', '닫기'],
-      defaultId: 0,
-      cancelId: 1,
-    }).then(({ response }) => {
-      if (response === 0) {
-        shell.openExternal('https://github.com/Miiirona/stretching-alarm/releases/latest');
-      }
-    });
+    // 에러는 조용히 처리 — 체크/다운로드 단계 오류를 팝업으로 띄우면
+    // 정상 설치 직후에도 오탐 발생하므로 트레이 툴팁만 복원
   });
 
   autoUpdater.checkForUpdates();
