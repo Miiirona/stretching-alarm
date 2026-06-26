@@ -65,9 +65,12 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
       const dateFrom = isToday ? todayStr() : weekStartStr();
 
       // ── 미동기화 스트레칭 완료 로그 → 모든 그룹에 flush ──
-      if (cfg.pendingLogs?.length > 0) {
+      // config:get으로 최신값을 가져와 클로저 stale 문제 방지
+      const freshCfg = await window.electronAPI.invoke('config:get');
+      const pendingLogs = freshCfg?.pendingLogs ?? cfg.pendingLogs ?? [];
+      if (pendingLogs.length > 0) {
         const batch = writeBatch(db);
-        for (const log of cfg.pendingLogs) {
+        for (const log of pendingLogs) {
           for (const g of groups) {
             const docId = `${cfg.userId}_${g.groupCode}_${log.completedAt.replace(/[:.]/g, '-')}`;
             batch.set(doc(db, 'stretching_logs', docId), {
