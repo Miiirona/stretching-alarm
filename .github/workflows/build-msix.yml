@@ -1,11 +1,9 @@
 name: Build MSIX (Microsoft Store)
 
 on:
-  # 태그 push 시 자동 빌드 (예: git tag v1.0.0 && git push --tags)
   push:
     tags:
       - 'v*'
-  # 수동 실행 (GitHub → Actions 탭 → Run workflow)
   workflow_dispatch:
 
 jobs:
@@ -41,3 +39,15 @@ jobs:
           name: StretchWidget-msix
           path: release/*.appx
           retention-days: 30
+
+      # 태그 push 시에만 Store 자동 제출 (수동 실행은 빌드만)
+      - name: Submit to Microsoft Store
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: microsoft/store-publish@v1
+        with:
+          product-id: ${{ secrets.STORE_PRODUCT_ID }}
+          package-path: release/*.appx
+        env:
+          AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+          AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+          AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
