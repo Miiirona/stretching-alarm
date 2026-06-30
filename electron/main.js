@@ -498,7 +498,7 @@ app.whenReady().then(() => {
   if (!startHidden) openSettings();
   scheduleNextAlarm();
   scheduleMidnightReset();
-  if (!isDev) setupAutoUpdater();
+  if (!isDev && !process.windowsStore) setupAutoUpdater();
 });
 
 // Tray-only app: do not quit when all windows close
