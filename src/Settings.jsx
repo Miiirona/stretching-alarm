@@ -153,6 +153,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   const [nickDraft,      setNickDraft]      = useState('');
   const [leavingCode,    setLeavingCode]    = useState(null); // 나가기 중인 그룹코드
 
+  const [activeTab,     setActiveTab]     = useState('stretch');
+
   const [addingSupp,    setAddingSupp]    = useState(false);
   const [suppName,      setSuppName]      = useState('');
   const [suppTime,      setSuppTime]      = useState('09:00');
@@ -375,11 +377,16 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
         </div>
       </div>
 
+      <div className="st-tab-bar">
+        <button className={`st-tab${activeTab === 'stretch' ? ' on' : ''}`} onClick={() => setActiveTab('stretch')}>스트레칭</button>
+        <button className={`st-tab${activeTab === 'supplement' ? ' on' : ''}`} onClick={() => setActiveTab('supplement')}>영양제</button>
+        <button className={`st-tab${activeTab === 'group' ? ' on' : ''}`} onClick={() => setActiveTab('group')}>그룹</button>
+      </div>
+
       <div className="st-scroll">
 
-        {/* ── 알림 설정 ── */}
-        <div className="st-block">
-          <p className="st-block-label">알림 설정</p>
+        {/* ── 스트레칭 탭 ── */}
+        {activeTab === 'stretch' && <div className="st-block">
 
           <section className="card">
             <div className="section-label">가동 요일</div>
@@ -439,13 +446,10 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
           <button className={`save-btn state-${saveState}`} onClick={handleSave} disabled={!isValid}>
             {saveState === 'saved' ? '저장됨 ✓' : saveState === 'error' ? '오류 발생' : '저장하기'}
           </button>
-        </div>
+        </div>}
 
-        <div className="st-sections-divider" />
-
-        {/* ── 영양제 알림 ── */}
-        <div className="st-block">
-          <p className="st-block-label">영양제 알림</p>
+        {/* ── 영양제 탭 ── */}
+        {activeTab === 'supplement' && <div className="st-block">
 
           <section className="card">
             <div className="supp-toggle-row">
@@ -550,13 +554,10 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
               )}
             </>
           )}
-        </div>
+        </div>}
 
-        <div className="st-sections-divider" />
-
-        {/* ── 그룹 ── */}
-        <div className="st-block">
-          <p className="st-block-label">그룹</p>
+        {/* ── 그룹 탭 ── */}
+        {activeTab === 'group' && <div className="st-block">
 
           {/* 닉네임 (그룹이 하나라도 있을 때 표시) */}
           {currentGroups.length > 0 && (
@@ -656,7 +657,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
             </button>
           </div>
 
-        </div>
+        </div>}
+
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ html, body {
   gap: 10px;
   padding: 20px 0;
 }
-.st-block:first-child { padding-top: 4px; }
+.st-block { padding-top: 4px; }
 .st-block-label {
   font-size: 12px;
   font-weight: 600;
@@ -46,7 +46,39 @@ html, body {
   color: rgba(255,255,255,0.28);
 }
 
-/* ── Sections divider ─────────────────────────────────────── */
+/* ── Tab bar ──────────────────────────────────────────────── */
+.st-tab-bar {
+  display: flex;
+  gap: 6px;
+  padding: 0 20px 14px;
+  flex-shrink: 0;
+}
+.st-tab {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.38);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.st-tab.on {
+  background: rgba(0,184,148,0.13);
+  border-color: rgba(0,184,148,0.35);
+  color: #00d4a8;
+  font-weight: 700;
+}
+.st-tab:not(.on):hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.65);
+}
+
+/* ── Sections divider (legacy, kept for safety) ───────────── */
 .st-sections-divider {
   height: 1px;
   background: rgba(255,255,255,0.06);
