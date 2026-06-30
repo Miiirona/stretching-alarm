@@ -528,6 +528,20 @@ html, body {
   width: 100px;
   font-weight: 600;
 }
+.st-edit-btn {
+  padding: 6px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.st-edit-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
 .st-leave-btn {
   align-self: flex-start;
   padding: 8px 14px;
