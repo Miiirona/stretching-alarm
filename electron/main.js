@@ -366,6 +366,8 @@ ipcMain.handle('dnd:cancel', () => {
 // --- Settings window ---
 function openSettings() {
   if (settingsWindow) {
+    if (settingsWindow.isMinimized()) settingsWindow.restore();
+    settingsWindow.show();
     settingsWindow.focus();
     return;
   }
