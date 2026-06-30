@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 340px;
+      background: transparent;
+      overflow: hidden;
+      font-family: -apple-system, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .toast {
+      width: 324px;
+      margin: 8px auto 0;
+      background: rgba(22, 22, 28, 0.96);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+      padding: 16px 16px 14px;
+      color: #fff;
+      -webkit-app-region: drag;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 12px;
+    }
+    .icon-wrap {
+      width: 38px; height: 38px;
+      background: rgba(253, 203, 110, 0.15);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .label-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
+    .label-name  { font-size: 15px; font-weight: 700; color: #fdcb6e; margin-top: 3px; letter-spacing: -0.3px; }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 9px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: opacity 0.15s;
+      letter-spacing: -0.2px;
+    }
+    .btn:hover  { opacity: 0.82; }
+    .btn-primary   { background: #fdcb6e; color: #1a1209; font-weight: 700; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast">
+    <div class="header">
+      <div class="icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M10.5 3.5L3.5 10.5a5 5 0 0 0 7.07 7.07L17.5 10.5a5 5 0 0 0-7-7z"
+            stroke="#fdcb6e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="8.5" y1="12.5" x2="15" y2="6"
+            stroke="#fdcb6e" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="label-title">영양제 드실 시간이에요!</div>
+        <div class="label-name" id="supName"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary"   id="btnTaken">먹었어요 ✓</button>
+      <button class="btn btn-secondary" id="btnSnooze">30분 후 다시 알리기</button>
+    </div>
+  </div>
+  <script>
+    const api = window.electronAPI;
+
+    new ResizeObserver(entries => {
+      const h = Math.ceil(entries[0].borderBoxSize[0].blockSize) + 8;
+      api.send('supplement:resize', h);
+    }).observe(document.getElementById('toast'));
+
+    const params = new URLSearchParams(location.search);
+    const supId  = params.get('id');
+    document.getElementById('supName').textContent = params.get('name') ?? '';
+
+    document.getElementById('btnTaken').addEventListener('click', () => {
+      api.send('supplement:taken', supId);
+    });
+    document.getElementById('btnSnooze').addEventListener('click', () => {
+      api.send('supplement:snooze', supId);
+    });
+  </script>
+</body>
+</html>

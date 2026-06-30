@@ -45,6 +45,10 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   const [nickDraft,      setNickDraft]      = useState('');
   const [leavingCode,    setLeavingCode]    = useState(null); // 나가기 중인 그룹코드
 
+  const [addingSupp, setAddingSupp] = useState(false);
+  const [suppName,   setSuppName]   = useState('');
+  const [suppTime,   setSuppTime]   = useState('09:00');
+
   const currentGroups = local.groups ?? [];
 
   const update = (key, val) => { setLocal(p => ({ ...p, [key]: val })); setSaveState('idle'); };
@@ -324,6 +328,89 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
           <button className={`save-btn state-${saveState}`} onClick={handleSave} disabled={!isValid}>
             {saveState === 'saved' ? '저장됨 ✓' : saveState === 'error' ? '오류 발생' : '저장하기'}
           </button>
+        </div>
+
+        <div className="st-sections-divider" />
+
+        {/* ── 영양제 알림 ── */}
+        <div className="st-block">
+          <p className="st-block-label">영양제 알림</p>
+
+          <section className="card">
+            <div className="supp-toggle-row">
+              <div>
+                <div className="supp-toggle-title">영양제 알림 사용</div>
+                <div className="supp-toggle-sub">설정한 시간에 복용 알림을 보내드려요</div>
+              </div>
+              <button
+                className={`supp-toggle-btn${local.supplementsEnabled ? ' on' : ''}`}
+                onClick={async () => {
+                  const next = !local.supplementsEnabled;
+                  const updated = await window.electronAPI.invoke('config:set', { supplementsEnabled: next });
+                  onCfgChange(updated);
+                  setLocal(p => ({ ...p, supplementsEnabled: next }));
+                }}
+              >{local.supplementsEnabled ? 'ON' : 'OFF'}</button>
+            </div>
+          </section>
+
+          {local.supplementsEnabled && (
+            <>
+              {(local.supplements ?? []).length > 0 && (
+                <div className="supp-list">
+                  {(local.supplements ?? []).map(sup => (
+                    <div key={sup.id} className="supp-item-row">
+                      <svg className="supp-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M10.5 3.5L3.5 10.5a5 5 0 0 0 7.07 7.07L17.5 10.5a5 5 0 0 0-7-7z"
+                          stroke="#fdcb6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <line x1="8.5" y1="12.5" x2="15" y2="6"
+                          stroke="#fdcb6e" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                      <div className="supp-item-info">
+                        <span className="supp-item-name">{sup.name}</span>
+                        <span className="supp-item-time">{sup.time}</span>
+                      </div>
+                      <button className="st-leave-btn" style={{ fontSize: 13, padding: '6px 11px' }}
+                        onClick={async () => {
+                          const next = (local.supplements ?? []).filter(s => s.id !== sup.id);
+                          const updated = await window.electronAPI.invoke('config:set', { supplements: next });
+                          onCfgChange(updated);
+                          setLocal(p => ({ ...p, supplements: next }));
+                        }}>삭제</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {addingSupp ? (
+                <div className="supp-add-form">
+                  <input className="st-input" placeholder="영양제 이름 (예: 비타민C)"
+                    value={suppName} onChange={e => setSuppName(e.target.value)}
+                    maxLength={20} autoFocus />
+                  <input type="time" className="st-input supp-time-input"
+                    value={suppTime} onChange={e => setSuppTime(e.target.value)} />
+                  <div className="supp-add-actions">
+                    <button className="st-name-action save"
+                      disabled={!suppName.trim()}
+                      onClick={async () => {
+                        const newSup = { id: Date.now().toString(), name: suppName.trim(), time: suppTime };
+                        const next = [...(local.supplements ?? []), newSup];
+                        const updated = await window.electronAPI.invoke('config:set', { supplements: next });
+                        onCfgChange(updated);
+                        setLocal(p => ({ ...p, supplements: next }));
+                        setSuppName(''); setSuppTime('09:00'); setAddingSupp(false);
+                      }}>추가</button>
+                    <button className="st-name-action cancel"
+                      onClick={() => { setSuppName(''); setSuppTime('09:00'); setAddingSupp(false); }}>취소</button>
+                  </div>
+                </div>
+              ) : (
+                <button className="supp-add-btn" onClick={() => setAddingSupp(true)}>
+                  <span>+</span> 영양제 추가
+                </button>
+              )}
+            </>
+          )}
         </div>
 
         <div className="st-sections-divider" />

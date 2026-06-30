@@ -386,6 +386,29 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
           </div>
         </section>
 
+        {/* ── 오늘의 영양제 ── */}
+        {cfg.supplementsEnabled && (cfg.supplements ?? []).length > 0 && (
+          <section className="dash-card dash-supp-card">
+            <span className="dash-card-label">오늘의 영양제</span>
+            <div className="dash-supp-list">
+              {(cfg.supplements ?? []).map(sup => {
+                const taken = (cfg.supplementLogs ?? []).some(l => l.id === sup.id);
+                return (
+                  <button key={sup.id} className={`dash-supp-item${taken ? ' taken' : ''}`}
+                    onClick={async () => {
+                      const upd = await window.electronAPI.invoke('supplement:toggle', sup.id);
+                      onCfgChange(upd);
+                    }}>
+                    <span className="dash-supp-check">{taken ? '✓' : '○'}</span>
+                    <span className="dash-supp-name">{sup.name}</span>
+                    <span className="dash-supp-time">{sup.time}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* ── 그룹 현황 ── */}
         {hasGroups ? (
           <>

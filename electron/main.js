@@ -67,6 +67,9 @@ const DEFAULT_CONFIG = {
   dailyGoal:           8,
   dailyCount:          0,
   lastDateStr:         '',
+  supplementsEnabled:  false,
+  supplements:         [], // [{ id, name, time: "HH:MM" }]
+  supplementLogs:      [], // 오늘 복용 기록 [{ id, takenAt }], 자정 리셋
 };
 
 let config = { ...DEFAULT_CONFIG };
@@ -122,6 +125,8 @@ function msUntilNextActiveStart(from = new Date()) {
 // --- Alarm state ---
 let alarmWindow  = null;
 let alarmTimer   = null;
+let supplementWindow  = null;
+let supplementTimers  = {}; // { supId: timeoutId }
 let nextAlarmAt  = null; // 다음 알람 예정 시각 (ms), 렌더러에 전달
 let dndUntil     = null;
 let dailyCount   = 0;
@@ -134,7 +139,7 @@ function checkDailyReset() {
   if (lastDateStr !== today) {
     lastDateStr = today;
     dailyCount  = 0;
-    saveConfig({ dailyCount: 0, lastDateStr: today, todayLogs: [] });
+    saveConfig({ dailyCount: 0, lastDateStr: today, todayLogs: [], supplementLogs: [] });
   }
 }
 
@@ -287,6 +292,54 @@ function showAlarm() {
   });
 }
 
+// --- Supplement scheduler ---
+function scheduleSupplements() {
+  Object.values(supplementTimers).forEach(id => clearTimeout(id));
+  supplementTimers = {};
+  if (!config.supplementsEnabled || !config.supplements?.length) return;
+  for (const sup of config.supplements) scheduleSupplement(sup);
+}
+
+function scheduleSupplement(sup) {
+  if (!sup?.id || !sup?.time) return;
+  const [h, m] = sup.time.split(':').map(Number);
+  const now = new Date();
+  const fire = new Date(now);
+  fire.setHours(h, m, 0, 0);
+  if (fire <= now) fire.setDate(fire.getDate() + 1);
+  supplementTimers[sup.id] = setTimeout(() => {
+    if (config.supplementsEnabled) {
+      const current = config.supplements?.find(s => s.id === sup.id);
+      if (current) showSupplementNotification(current);
+    }
+    scheduleSupplement(sup); // 다음 날 재예약
+  }, fire - now);
+}
+
+function showSupplementNotification(sup) {
+  if (supplementWindow && !supplementWindow.isDestroyed()) supplementWindow.close();
+  const { width: sw } = screen.getPrimaryDisplay().workAreaSize;
+  supplementWindow = new BrowserWindow({
+    width: 340, height: 140,
+    x: sw - 340 - 16, y: 16,
+    frame: false, transparent: true,
+    alwaysOnTop: true, skipTaskbar: true,
+    resizable: false, show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true, nodeIntegration: false,
+    },
+  });
+  supplementWindow.loadFile(path.join(__dirname, 'supplement-notification.html'), {
+    query: { id: sup.id, name: sup.name },
+  });
+  supplementWindow.once('ready-to-show', () => {
+    if (!supplementWindow || supplementWindow.isDestroyed()) return;
+    supplementWindow.showInactive();
+  });
+  supplementWindow.on('closed', () => { supplementWindow = null; });
+}
+
 function closeAlarm() {
   if (alarmWindow && !alarmWindow.isDestroyed()) {
     alarmWindow.close();
@@ -340,6 +393,44 @@ ipcMain.on('alarm:action', (_, { action, value }) => {
   }
 });
 
+// --- Supplement IPC ---
+ipcMain.on('supplement:resize', (_, height) => {
+  if (!supplementWindow || supplementWindow.isDestroyed()) return;
+  const { x, y, width } = supplementWindow.getBounds();
+  supplementWindow.setBounds({ x, y, width, height });
+});
+
+ipcMain.on('supplement:taken', (_, supId) => {
+  const logs = config.supplementLogs ?? [];
+  if (!logs.some(l => l.id === supId)) {
+    saveConfig({ supplementLogs: [...logs, { id: supId, takenAt: new Date().toISOString() }] });
+  }
+  if (supplementWindow && !supplementWindow.isDestroyed()) supplementWindow.close();
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.webContents.send('config:updated', { ...config, dailyCount, isDev, nextAlarmAt, dndUntil });
+  }
+});
+
+ipcMain.on('supplement:snooze', (_, supId) => {
+  if (supplementWindow && !supplementWindow.isDestroyed()) supplementWindow.close();
+  const sup = config.supplements?.find(s => s.id === supId);
+  if (sup) {
+    supplementTimers[`${supId}_snooze`] = setTimeout(() => {
+      if (config.supplementsEnabled) showSupplementNotification(sup);
+    }, 30 * 60 * 1000);
+  }
+});
+
+ipcMain.handle('supplement:toggle', (_, supId) => {
+  const logs = config.supplementLogs ?? [];
+  const taken = logs.some(l => l.id === supId);
+  const supplementLogs = taken
+    ? logs.filter(l => l.id !== supId)
+    : [...logs, { id: supId, takenAt: new Date().toISOString() }];
+  saveConfig({ supplementLogs });
+  return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
+});
+
 ipcMain.handle('config:get', () => {
   checkDailyReset();
   return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
@@ -350,7 +441,9 @@ ipcMain.handle('config:set', (_, updates) => {
   if ('lastDateStr' in updates) lastDateStr = updates.lastDateStr;
   // 알람 관련 설정이 바뀔 때만 재스케줄 (그룹/닉네임 저장 등에서는 타이머 건드리지 않음)
   const alarmKeys = new Set(['intervalMinutes', 'startHour', 'endHour', 'activeDays']);
+  const suppKeys  = new Set(['supplements', 'supplementsEnabled']);
   if (Object.keys(updates).some(k => alarmKeys.has(k))) scheduleNextAlarm();
+  if (Object.keys(updates).some(k => suppKeys.has(k))) scheduleSupplements();
   return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
 });
 
@@ -497,6 +590,7 @@ app.whenReady().then(() => {
   createTray();
   if (!startHidden) openSettings();
   scheduleNextAlarm();
+  scheduleSupplements();
   scheduleMidnightReset();
   if (!isDev && !process.windowsStore) setupAutoUpdater();
 });

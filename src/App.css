@@ -763,3 +763,112 @@ html, body {
   letter-spacing: 1.5px;
   font-weight: 600;
 }
+
+/* ── 영양제 알림 설정 ─────────────────────────────────────── */
+.supp-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.supp-toggle-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+.supp-toggle-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 3px;
+}
+.supp-toggle-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.35);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+.supp-toggle-btn.on {
+  background: rgba(253,203,110,0.15);
+  border-color: rgba(253,203,110,0.45);
+  color: #fdcb6e;
+}
+.supp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.supp-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 11px;
+  padding: 11px 13px;
+}
+.supp-pill-icon { flex-shrink: 0; opacity: 0.9; }
+.supp-item-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.supp-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.supp-item-time {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+.supp-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 13px;
+}
+.supp-time-input {
+  color-scheme: dark;
+}
+.supp-add-actions {
+  display: flex;
+  gap: 7px;
+}
+.supp-add-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px dashed rgba(253,203,110,0.3);
+  background: rgba(253,203,110,0.05);
+  color: rgba(253,203,110,0.65);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.supp-add-btn:hover {
+  background: rgba(253,203,110,0.1);
+  color: #fdcb6e;
+}
