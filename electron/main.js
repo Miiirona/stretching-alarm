@@ -443,7 +443,7 @@ ipcMain.handle('config:set', (_, updates) => {
   const alarmKeys = new Set(['intervalMinutes', 'startHour', 'endHour', 'activeDays']);
   const suppKeys  = new Set(['supplements', 'supplementsEnabled']);
   if (Object.keys(updates).some(k => alarmKeys.has(k))) scheduleNextAlarm();
-  if (Object.keys(updates).some(k => suppKeys.has(k))) scheduleSupplements();
+  if (Object.keys(updates).some(k => suppKeys.has(k))) { scheduleSupplements(); rebuildTrayMenu(); }
   return { ...config, dailyCount, isDev, nextAlarmAt, dndUntil };
 });
 
@@ -498,6 +498,12 @@ function rebuildTrayMenu() {
 
   if (isDev) {
     items.push({ label: '[DEV] 알림 즉시 띄우기', click: showAlarm });
+    if (config.supplements?.length > 0) {
+      items.push({
+        label: '[DEV] 영양제 알림 즉시 띄우기',
+        click: () => showSupplementNotification(config.supplements[0]),
+      });
+    }
     items.push({ type: 'separator' });
   }
 
