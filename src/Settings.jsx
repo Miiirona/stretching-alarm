@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from './firebase.js';
 import { doc, setDoc, getDoc, deleteDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import './App.css';
@@ -16,25 +16,109 @@ function generateCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+function formatTime12(time) {
+  if (!time) return '';
+  const [h, m] = time.split(':').map(Number);
+  const pm = h >= 12;
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${pm ? '오후' : '오전'} ${h12}:${String(m).padStart(2, '0')}`;
+}
+
 function TimePicker({ value, onChange }) {
-  const parts = (value || '09:00').split(':');
-  const h = parseInt(parts[0], 10) || 0;
-  const m = parseInt(parts[1], 10) || 0;
-  const fmt = (n) => String(n).padStart(2, '0');
-  const setH = (newH) => onChange(`${fmt(newH)}:${fmt(m)}`);
-  const setM = (newM) => onChange(`${fmt(h)}:${fmt(newM)}`);
+  const parse = (v) => {
+    const p = (v || '09:00').split(':');
+    const h24 = parseInt(p[0], 10) || 0;
+    const min = parseInt(p[1], 10) || 0;
+    const pm = h24 >= 12;
+    const h12 = h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24;
+    return { h24, min, pm, h12 };
+  };
+
+  const { h24, min, pm: isPm, h12 } = parse(value);
+  const [hText, setHText] = useState(String(h12));
+  const [mText, setMText] = useState(String(min).padStart(2, '0'));
+
+  useEffect(() => {
+    const { h12: hh, min: mm } = parse(value);
+    setHText(String(hh));
+    setMText(String(mm).padStart(2, '0'));
+  }, [value]);
+
+  const f2 = (n) => String(n).padStart(2, '0');
+
+  const to24 = (h12val, pm) => {
+    let h = parseInt(h12val, 10);
+    if (isNaN(h) || h < 1) h = 12;
+    if (h > 12) h = 12;
+    return pm ? (h === 12 ? 12 : h + 12) : (h === 12 ? 0 : h);
+  };
+
+  const commit = (newH24, newMin) => onChange(`${f2(newH24)}:${f2(newMin)}`);
+
+  const commitHour = (text) => {
+    let h = parseInt(text, 10);
+    if (isNaN(h) || h < 1) h = 12;
+    if (h > 12) h = 12;
+    setHText(String(h));
+    commit(to24(h, isPm), min);
+  };
+
+  const commitMinute = (text) => {
+    let m = parseInt(text, 10);
+    if (isNaN(m) || m < 0) m = 0;
+    if (m > 59) m = 59;
+    setMText(f2(m));
+    commit(to24(hText, isPm), m);
+  };
+
+  const stepHour = (delta) => {
+    let h = (parseInt(hText, 10) || 12) + delta;
+    if (h < 1) h = 12;
+    if (h > 12) h = 1;
+    setHText(String(h));
+    commit(to24(h, isPm), min);
+  };
+
+  const stepMinute = (delta) => {
+    let m = Math.round(min / 5) * 5 + delta;
+    if (m < 0) m = 55;
+    if (m >= 60) m = 0;
+    setMText(f2(m));
+    commit(to24(hText, isPm), m);
+  };
+
+  const setPeriod = (pm) => commit(to24(hText, pm), min);
+
   return (
     <div className="supp-time-picker">
       <div className="supp-time-unit">
-        <button className="hour-arrow" onClick={() => setH((h + 23) % 24)}>‹</button>
-        <span className="supp-time-digit">{fmt(h)}</span>
-        <button className="hour-arrow" onClick={() => setH((h + 1) % 24)}>›</button>
+        <button className="hour-arrow" onClick={() => stepHour(-1)}>‹</button>
+        <input
+          className="supp-time-input"
+          value={hText}
+          onChange={e => setHText(e.target.value.replace(/\D/g, ''))}
+          onBlur={e => commitHour(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && commitHour(e.target.value)}
+          maxLength={2}
+        />
+        <button className="hour-arrow" onClick={() => stepHour(1)}>›</button>
       </div>
       <span className="supp-time-colon">:</span>
       <div className="supp-time-unit">
-        <button className="hour-arrow" onClick={() => setM(m < 5 ? 55 : m - 5)}>‹</button>
-        <span className="supp-time-digit">{fmt(m)}</span>
-        <button className="hour-arrow" onClick={() => setM((m + 5) % 60)}>›</button>
+        <button className="hour-arrow" onClick={() => stepMinute(-5)}>‹</button>
+        <input
+          className="supp-time-input"
+          value={mText}
+          onChange={e => setMText(e.target.value.replace(/\D/g, ''))}
+          onBlur={e => commitMinute(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && commitMinute(e.target.value)}
+          maxLength={2}
+        />
+        <button className="hour-arrow" onClick={() => stepMinute(5)}>›</button>
+      </div>
+      <div className="supp-ampm-toggle">
+        <button className={`supp-ampm-btn${!isPm ? ' active' : ''}`} onClick={() => setPeriod(false)}>오전</button>
+        <button className={`supp-ampm-btn${isPm ? ' active' : ''}`} onClick={() => setPeriod(true)}>오후</button>
       </div>
     </div>
   );
@@ -418,7 +502,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
                         </svg>
                         <div className="supp-item-info">
                           <span className="supp-item-name">{sup.name}</span>
-                          <span className="supp-item-time">{sup.time}</span>
+                          <span className="supp-item-time">{formatTime12(sup.time)}</span>
                         </div>
                         <button className="st-name-edit-btn" style={{ marginRight: 4 }}
                           onClick={() => { setEditingSupId(sup.id); setEditSuppName(sup.name); setEditSuppTime(sup.time); setAddingSupp(false); }}>
