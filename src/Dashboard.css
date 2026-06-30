@@ -656,6 +656,7 @@
   gap: 6px;
 }
 .dash-supp-chip {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -671,6 +672,26 @@
   transition: all 0.15s;
 }
 .dash-supp-chip:hover { background: rgba(255,255,255,0.09); }
+.dash-supp-chip[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 22, 0.96);
+  color: rgba(255,255,255,0.85);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.dash-supp-chip[data-tooltip]:hover::after { opacity: 1; }
 .dash-supp-chip.taken {
   border-color: rgba(253,203,110,0.35);
   background: rgba(253,203,110,0.08);

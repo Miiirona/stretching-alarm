@@ -8,6 +8,22 @@ import './Dashboard.css';
 
 const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
 
+function fmt12(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const pm = h >= 12;
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${pm ? '오후' : '오전'} ${h12}:${String(m).padStart(2, '0')}`;
+}
+
+function fmt12FromISO(isoStr) {
+  const d = new Date(isoStr);
+  const h = d.getHours(), m = d.getMinutes();
+  const pm = h >= 12;
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${pm ? '오후' : '오전'} ${h12}:${String(m).padStart(2, '0')}`;
+}
+
 function fmtInterval(m) {
   if (m < 60) return `${m}분마다`;
   const h = Math.floor(m / 60), min = m % 60;
@@ -393,9 +409,15 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
               <span className="dash-supp-label">영양제</span>
               <div className="dash-supp-chips">
                 {(cfg.supplements ?? []).map(sup => {
-                  const taken = (cfg.supplementLogs ?? []).some(l => l.id === sup.id);
+                  const logEntry = (cfg.supplementLogs ?? []).find(l => l.id === sup.id);
+                  const taken = !!logEntry;
+                  const tooltip = taken
+                    ? `${fmt12FromISO(logEntry.takenAt)} 복용`
+                    : fmt12(sup.time);
                   return (
-                    <button key={sup.id} className={`dash-supp-chip${taken ? ' taken' : ''}`}
+                    <button key={sup.id}
+                      className={`dash-supp-chip${taken ? ' taken' : ''}`}
+                      data-tooltip={tooltip}
                       onClick={async () => {
                         const upd = await window.electronAPI.invoke('supplement:toggle', sup.id);
                         onCfgChange(upd);
