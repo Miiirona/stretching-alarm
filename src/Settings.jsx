@@ -469,7 +469,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
             <>
               {(local.supplements ?? []).length > 0 && (
                 <div className="supp-list">
-                  {(local.supplements ?? []).map(sup => (
+                  {(local.supplements ?? []).slice().sort((a, b) => a.time.localeCompare(b.time)).map(sup => (
                     editingSupId === sup.id ? (
                       <div key={sup.id} className="supp-add-form">
                         <input className="st-input" placeholder="영양제 이름"

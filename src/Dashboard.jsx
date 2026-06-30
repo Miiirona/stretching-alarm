@@ -408,7 +408,7 @@ export default function Dashboard({ cfg, onCfgChange, onSettingsOpen }) {
             <div className="dash-supp-row">
               <span className="dash-supp-label">영양제</span>
               <div className="dash-supp-chips">
-                {(cfg.supplements ?? []).map(sup => {
+                {(cfg.supplements ?? []).slice().sort((a, b) => a.time.localeCompare(b.time)).map(sup => {
                   const logEntry = (cfg.supplementLogs ?? []).find(l => l.id === sup.id);
                   const taken = !!logEntry;
                   const tooltip = taken
