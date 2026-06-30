@@ -35,8 +35,7 @@
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .label-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
-    .label-name  { font-size: 15px; font-weight: 700; color: #fdcb6e; margin-top: 3px; letter-spacing: -0.3px; }
+    .label-name { font-size: 16px; font-weight: 700; color: #fdcb6e; letter-spacing: -0.3px; }
     .actions {
       display: flex;
       flex-direction: column;
@@ -58,6 +57,7 @@
     .btn:hover  { opacity: 0.82; }
     .btn-primary   { background: #fdcb6e; color: #1a1209; font-weight: 700; }
     .btn-secondary { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); }
+    .btn-ghost     { background: none; color: rgba(255,255,255,0.28); font-size: 12px; padding: 7px 14px; }
   </style>
 </head>
 <body>
@@ -71,14 +71,12 @@
             stroke="#fdcb6e" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </div>
-      <div>
-        <div class="label-title">영양제 드실 시간이에요!</div>
-        <div class="label-name" id="supName"></div>
-      </div>
+      <div class="label-name" id="supName"></div>
     </div>
     <div class="actions">
       <button class="btn btn-primary"   id="btnTaken">먹었어요 ✓</button>
-      <button class="btn btn-secondary" id="btnSnooze">30분 후 다시 알리기</button>
+      <button class="btn btn-secondary" id="btnSnooze">5분 후 다시 알리기</button>
+      <button class="btn btn-ghost"     id="btnSkip">오늘 안 먹기</button>
     </div>
   </div>
   <script>
@@ -93,12 +91,9 @@
     const supId  = params.get('id');
     document.getElementById('supName').textContent = params.get('name') ?? '';
 
-    document.getElementById('btnTaken').addEventListener('click', () => {
-      api.send('supplement:taken', supId);
-    });
-    document.getElementById('btnSnooze').addEventListener('click', () => {
-      api.send('supplement:snooze', supId);
-    });
+    document.getElementById('btnTaken').addEventListener('click',  () => api.send('supplement:taken',  supId));
+    document.getElementById('btnSnooze').addEventListener('click', () => api.send('supplement:snooze', supId));
+    document.getElementById('btnSkip').addEventListener('click',   () => api.send('supplement:skip',   supId));
   </script>
 </body>
 </html>

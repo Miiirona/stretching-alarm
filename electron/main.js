@@ -417,7 +417,16 @@ ipcMain.on('supplement:snooze', (_, supId) => {
   if (sup) {
     supplementTimers[`${supId}_snooze`] = setTimeout(() => {
       if (config.supplementsEnabled) showSupplementNotification(sup);
-    }, 30 * 60 * 1000);
+    }, 5 * 60 * 1000);
+  }
+});
+
+ipcMain.on('supplement:skip', (_, supId) => {
+  if (supplementWindow && !supplementWindow.isDestroyed()) supplementWindow.close();
+  const snoozeKey = `${supId}_snooze`;
+  if (supplementTimers[snoozeKey]) {
+    clearTimeout(supplementTimers[snoozeKey]);
+    delete supplementTimers[snoozeKey];
   }
 });
 

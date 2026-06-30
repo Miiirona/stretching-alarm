@@ -16,6 +16,30 @@ function generateCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+function TimePicker({ value, onChange }) {
+  const parts = (value || '09:00').split(':');
+  const h = parseInt(parts[0], 10) || 0;
+  const m = parseInt(parts[1], 10) || 0;
+  const fmt = (n) => String(n).padStart(2, '0');
+  const setH = (newH) => onChange(`${fmt(newH)}:${fmt(m)}`);
+  const setM = (newM) => onChange(`${fmt(h)}:${fmt(newM)}`);
+  return (
+    <div className="supp-time-picker">
+      <div className="supp-time-unit">
+        <button className="hour-arrow" onClick={() => setH((h + 23) % 24)}>‹</button>
+        <span className="supp-time-digit">{fmt(h)}</span>
+        <button className="hour-arrow" onClick={() => setH((h + 1) % 24)}>›</button>
+      </div>
+      <span className="supp-time-colon">:</span>
+      <div className="supp-time-unit">
+        <button className="hour-arrow" onClick={() => setM(m < 5 ? 55 : m - 5)}>‹</button>
+        <span className="supp-time-digit">{fmt(m)}</span>
+        <button className="hour-arrow" onClick={() => setM((m + 5) % 60)}>›</button>
+      </div>
+    </div>
+  );
+}
+
 function HourPicker({ label, value, min, max, onChange }) {
   return (
     <div className="hour-picker">
@@ -45,9 +69,12 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
   const [nickDraft,      setNickDraft]      = useState('');
   const [leavingCode,    setLeavingCode]    = useState(null); // 나가기 중인 그룹코드
 
-  const [addingSupp, setAddingSupp] = useState(false);
-  const [suppName,   setSuppName]   = useState('');
-  const [suppTime,   setSuppTime]   = useState('09:00');
+  const [addingSupp,    setAddingSupp]    = useState(false);
+  const [suppName,      setSuppName]      = useState('');
+  const [suppTime,      setSuppTime]      = useState('09:00');
+  const [editingSupId,  setEditingSupId]  = useState(null);
+  const [editSuppName,  setEditSuppName]  = useState('');
+  const [editSuppTime,  setEditSuppTime]  = useState('09:00');
 
   const currentGroups = local.groups ?? [];
 
@@ -359,25 +386,56 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
               {(local.supplements ?? []).length > 0 && (
                 <div className="supp-list">
                   {(local.supplements ?? []).map(sup => (
-                    <div key={sup.id} className="supp-item-row">
-                      <svg className="supp-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M10.5 3.5L3.5 10.5a5 5 0 0 0 7.07 7.07L17.5 10.5a5 5 0 0 0-7-7z"
-                          stroke="#fdcb6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <line x1="8.5" y1="12.5" x2="15" y2="6"
-                          stroke="#fdcb6e" strokeWidth="1.8" strokeLinecap="round"/>
-                      </svg>
-                      <div className="supp-item-info">
-                        <span className="supp-item-name">{sup.name}</span>
-                        <span className="supp-item-time">{sup.time}</span>
+                    editingSupId === sup.id ? (
+                      <div key={sup.id} className="supp-add-form">
+                        <input className="st-input" placeholder="영양제 이름"
+                          value={editSuppName} onChange={e => setEditSuppName(e.target.value)}
+                          maxLength={20} autoFocus />
+                        <TimePicker value={editSuppTime} onChange={setEditSuppTime} />
+                        <div className="supp-add-actions">
+                          <button className="st-name-action save"
+                            disabled={!editSuppName.trim()}
+                            onClick={async () => {
+                              const next = (local.supplements ?? []).map(s =>
+                                s.id === sup.id ? { ...s, name: editSuppName.trim(), time: editSuppTime } : s
+                              );
+                              const updated = await window.electronAPI.invoke('config:set', { supplements: next });
+                              onCfgChange(updated);
+                              setLocal(p => ({ ...p, supplements: next }));
+                              setEditingSupId(null);
+                            }}>저장</button>
+                          <button className="st-name-action cancel"
+                            onClick={() => setEditingSupId(null)}>취소</button>
+                        </div>
                       </div>
-                      <button className="st-leave-btn" style={{ fontSize: 13, padding: '6px 11px' }}
-                        onClick={async () => {
-                          const next = (local.supplements ?? []).filter(s => s.id !== sup.id);
-                          const updated = await window.electronAPI.invoke('config:set', { supplements: next });
-                          onCfgChange(updated);
-                          setLocal(p => ({ ...p, supplements: next }));
-                        }}>삭제</button>
-                    </div>
+                    ) : (
+                      <div key={sup.id} className="supp-item-row">
+                        <svg className="supp-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M10.5 3.5L3.5 10.5a5 5 0 0 0 7.07 7.07L17.5 10.5a5 5 0 0 0-7-7z"
+                            stroke="#fdcb6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <line x1="8.5" y1="12.5" x2="15" y2="6"
+                            stroke="#fdcb6e" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                        <div className="supp-item-info">
+                          <span className="supp-item-name">{sup.name}</span>
+                          <span className="supp-item-time">{sup.time}</span>
+                        </div>
+                        <button className="st-name-edit-btn" style={{ marginRight: 4 }}
+                          onClick={() => { setEditingSupId(sup.id); setEditSuppName(sup.name); setEditSuppTime(sup.time); setAddingSupp(false); }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        <button className="st-leave-btn" style={{ fontSize: 13, padding: '6px 11px' }}
+                          onClick={async () => {
+                            const next = (local.supplements ?? []).filter(s => s.id !== sup.id);
+                            const updated = await window.electronAPI.invoke('config:set', { supplements: next });
+                            onCfgChange(updated);
+                            setLocal(p => ({ ...p, supplements: next }));
+                          }}>삭제</button>
+                      </div>
+                    )
                   ))}
                 </div>
               )}
@@ -387,8 +445,7 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
                   <input className="st-input" placeholder="영양제 이름 (예: 비타민C)"
                     value={suppName} onChange={e => setSuppName(e.target.value)}
                     maxLength={20} autoFocus />
-                  <input type="time" className="st-input supp-time-input"
-                    value={suppTime} onChange={e => setSuppTime(e.target.value)} />
+                  <TimePicker value={suppTime} onChange={setSuppTime} />
                   <div className="supp-add-actions">
                     <button className="st-name-action save"
                       disabled={!suppName.trim()}
@@ -405,7 +462,8 @@ export default function Settings({ cfg, onBack, onCfgChange }) {
                   </div>
                 </div>
               ) : (
-                <button className="supp-add-btn" onClick={() => setAddingSupp(true)}>
+                <button className="supp-add-btn"
+                  onClick={() => { setAddingSupp(true); setEditingSupId(null); }}>
                   <span>+</span> 영양제 추가
                 </button>
               )}
