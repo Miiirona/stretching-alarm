@@ -865,6 +865,7 @@ html, body {
 .supp-add-actions {
   display: flex;
   gap: 7px;
+  justify-content: center;
 }
 .supp-add-btn {
   width: 100%;

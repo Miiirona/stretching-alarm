@@ -91,6 +91,10 @@ function TimePicker({ value, onChange }) {
 
   return (
     <div className="supp-time-picker">
+      <div className="supp-ampm-toggle">
+        <button className={`supp-ampm-btn${!isPm ? ' active' : ''}`} onClick={() => setPeriod(false)}>오전</button>
+        <button className={`supp-ampm-btn${isPm ? ' active' : ''}`} onClick={() => setPeriod(true)}>오후</button>
+      </div>
       <div className="supp-time-unit">
         <button className="hour-arrow" onClick={() => stepHour(-1)}>‹</button>
         <input
@@ -115,10 +119,6 @@ function TimePicker({ value, onChange }) {
           maxLength={2}
         />
         <button className="hour-arrow" onClick={() => stepMinute(5)}>›</button>
-      </div>
-      <div className="supp-ampm-toggle">
-        <button className={`supp-ampm-btn${!isPm ? ' active' : ''}`} onClick={() => setPeriod(false)}>오전</button>
-        <button className={`supp-ampm-btn${isPm ? ' active' : ''}`} onClick={() => setPeriod(true)}>오후</button>
       </div>
     </div>
   );
