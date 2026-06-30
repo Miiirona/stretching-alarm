@@ -425,19 +425,23 @@ html, body {
   flex-shrink: 0;
 }
 .st-header {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
   padding: 20px 0 14px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   margin-bottom: 12px;
   flex-shrink: 0;
 }
 .st-header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 18px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.4px;
+  pointer-events: none;
 }
 .st-back {
   background: none;
